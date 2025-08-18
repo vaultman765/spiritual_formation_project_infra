@@ -1,0 +1,42 @@
+name: infra
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  tf:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-east-1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: <PASTE_ROLE_ARN_FROM_TERRAFORM_OUTPUT>
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Init
+        working-directory: infra/envs/staging
+        run: terraform init -backend-config=backend.hcl -reconfigure
+
+      - name: Plan
+        if: github.event_name == 'pull_request'
+        working-directory: infra/envs/staging
+        run: terraform plan -no-color
+
+      - name: Apply
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        working-directory: infra/envs/staging
+        run: terraform apply -auto-approve
