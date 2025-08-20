@@ -11,6 +11,11 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
   }
 }
 
+resource "aws_s3_bucket_notification" "logs" {
+  bucket      = aws_s3_bucket.logs.id
+  eventbridge = true
+}
+
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
   rule {
@@ -43,4 +48,3 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
     }
   }
 }
-

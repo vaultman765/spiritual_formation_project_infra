@@ -2,7 +2,7 @@
   "totals_by_severity": [
     {
       "severity": null,
-      "count": 85
+      "count": 70
     }
   ],
   "top_checks": [
@@ -19,38 +19,8 @@
       "count": 5
     },
     {
-      "check_id": "CKV2_AWS_32",
-      "name": "Ensure CloudFront distribution has a response headers policy attached",
-      "severity": null,
-      "count": 4
-    },
-    {
-      "check_id": "CKV2_AWS_47",
-      "name": "Ensure AWS CloudFront attached WAFv2 WebACL is configured with AMR for Log4j Vulnerability",
-      "severity": null,
-      "count": 4
-    },
-    {
-      "check_id": "CKV2_AWS_62",
-      "name": "Ensure S3 buckets should have event notifications enabled",
-      "severity": null,
-      "count": 4
-    },
-    {
       "check_id": "CKV_AWS_158",
       "name": "Ensure that CloudWatch Log Group is encrypted by KMS",
-      "severity": null,
-      "count": 4
-    },
-    {
-      "check_id": "CKV_AWS_310",
-      "name": "Ensure CloudFront distributions should have origin failover configured",
-      "severity": null,
-      "count": 4
-    },
-    {
-      "check_id": "CKV_AWS_374",
-      "name": "Ensure AWS CloudFront web distribution has geo restriction enabled",
       "severity": null,
       "count": 4
     },
@@ -61,10 +31,10 @@
       "count": 4
     },
     {
-      "check_id": "CKV_AWS_68",
-      "name": "CloudFront Distribution should have WAF enabled",
+      "check_id": "CKV2_AWS_32",
+      "name": "Ensure CloudFront distribution has a response headers policy attached",
       "severity": null,
-      "count": 4
+      "count": 3
     },
     {
       "check_id": "CKV2_AWS_38",
@@ -79,14 +49,14 @@
       "count": 3
     },
     {
-      "check_id": "CKV2_AWS_5",
-      "name": "Ensure that Security Groups are attached to another resource",
+      "check_id": "CKV2_AWS_47",
+      "name": "Ensure AWS CloudFront attached WAFv2 WebACL is configured with AMR for Log4j Vulnerability",
       "severity": null,
       "count": 3
     },
     {
-      "check_id": "CKV_AWS_18",
-      "name": "Ensure the S3 bucket has access logging enabled",
+      "check_id": "CKV2_AWS_5",
+      "name": "Ensure that Security Groups are attached to another resource",
       "severity": null,
       "count": 3
     },
@@ -97,32 +67,38 @@
       "count": 3
     },
     {
-      "check_id": "CKV_AWS_305",
-      "name": "Ensure CloudFront distribution has a default root object configured",
+      "check_id": "CKV_AWS_310",
+      "name": "Ensure CloudFront distributions should have origin failover configured",
       "severity": null,
       "count": 3
     },
     {
-      "check_id": "CKV2_AWS_61",
-      "name": "Ensure that an S3 bucket has a lifecycle configuration",
+      "check_id": "CKV_AWS_374",
+      "name": "Ensure AWS CloudFront web distribution has geo restriction enabled",
+      "severity": null,
+      "count": 3
+    },
+    {
+      "check_id": "CKV_AWS_68",
+      "name": "CloudFront Distribution should have WAF enabled",
+      "severity": null,
+      "count": 3
+    },
+    {
+      "check_id": "CKV2_AWS_62",
+      "name": "Ensure S3 buckets should have event notifications enabled",
       "severity": null,
       "count": 2
     },
     {
-      "check_id": "CKV_AWS_233",
-      "name": "Ensure Create before destroy for ACM certificates",
+      "check_id": "CKV_AWS_18",
+      "name": "Ensure the S3 bucket has access logging enabled",
       "severity": null,
       "count": 2
     },
     {
       "check_id": "CKV_AWS_338",
       "name": "Ensure CloudWatch log groups retains logs for at least 1 year",
-      "severity": null,
-      "count": 2
-    },
-    {
-      "check_id": "CKV_AWS_86",
-      "name": "Ensure CloudFront distribution has Access Logging enabled",
       "severity": null,
       "count": 2
     },
@@ -151,8 +127,32 @@
       "count": 1
     },
     {
+      "check_id": "CKV2_AWS_61",
+      "name": "Ensure that an S3 bucket has a lifecycle configuration",
+      "severity": null,
+      "count": 1
+    },
+    {
       "check_id": "CKV2_AWS_65",
       "name": "Ensure access control lists for S3 buckets are disabled",
+      "severity": null,
+      "count": 1
+    },
+    {
+      "check_id": "CKV_AWS_118",
+      "name": "Ensure that enhanced monitoring is enabled for Amazon RDS instances",
+      "severity": null,
+      "count": 1
+    },
+    {
+      "check_id": "CKV_AWS_119",
+      "name": "Ensure DynamoDB Tables are encrypted using a KMS Customer Managed CMK",
+      "severity": null,
+      "count": 1
+    },
+    {
+      "check_id": "CKV_AWS_130",
+      "name": "Ensure VPC subnets do not assign public IP by default",
       "severity": null,
       "count": 1
     }
@@ -160,11 +160,7 @@
   "noisiest_files": [
     {
       "file": "\\main.tf",
-      "count": 40
-    },
-    {
-      "file": "\\modules\\redirect_domain\\main.tf",
-      "count": 12
+      "count": 34
     },
     {
       "file": "\\modules\\rds\\main.tf",
@@ -184,6 +180,10 @@
     },
     {
       "file": "\\modules\\cloudfront_site\\main.tf",
+      "count": 3
+    },
+    {
+      "file": "\\modules\\redirect_domain\\main.tf",
       "count": 3
     },
     {

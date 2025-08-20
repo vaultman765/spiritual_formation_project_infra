@@ -47,6 +47,6 @@ variable "response_headers_policy_id" {
   default = null
 }
 variable "log_bucket_name" {
-  type = string
+  type    = string
   default = null
-  }
+}

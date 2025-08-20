@@ -77,6 +77,6 @@ module "logging" {
 }
 
 module "cf_policies" {
-  source     = "../../modules/cloudfront_policies"
+  source      = "../../modules/cloudfront_policies"
   name_prefix = var.name_prefix
 }

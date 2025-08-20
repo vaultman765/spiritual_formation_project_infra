@@ -13,4 +13,7 @@ module "redirect_mwc" {
 
   from_domains = var.mwc_sources
   to_domain    = var.frontend_domain_name
+
+  response_headers_policy_id = module.cf_policies.security_headers_policy_id
+  log_bucket_name            = module.logging.log_bucket_name
 }

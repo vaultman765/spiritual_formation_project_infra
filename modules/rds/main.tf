@@ -169,7 +169,7 @@ resource "aws_db_instance" "this" {
   enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
 
   # (Optional but useful)
-  performance_insights_enabled = false  # prod can override to true later
+  performance_insights_enabled = false # prod can override to true later
 
 
 

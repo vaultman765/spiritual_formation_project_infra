@@ -97,13 +97,13 @@ variable "secret_name" {
 
 # Backups & protection (safe defaults for staging; override in prod)
 variable "backup_retention_period" {
-  type = number
+  type    = number
   default = 3
-  }   # prod: 7+
-variable "deletion_protection"     {
-  type = bool
+} # prod: 7+
+variable "deletion_protection" {
+  type    = bool
   default = false
-  } # prod: true
+} # prod: true
 
 # CloudWatch Logs exports for RDS
 # Checkov expects "postgresql" to be exported; add others as needed
@@ -116,16 +116,16 @@ variable "enabled_cloudwatch_logs_exports" {
 #  - log_min_duration_statement: ms threshold (5000ms default to avoid noise)
 #  - log_statement: none | ddl | mod | all
 variable "rds_log_min_duration_ms" {
-  type = number
+  type    = number
   default = 5000
-  }
-variable "rds_log_statement"       {
-  type = string
+}
+variable "rds_log_statement" {
+  type    = string
   default = "none"
-  } # prod can tune if desired
+} # prod can tune if desired
 
 # CloudWatch retention for RDS log groups (days)
 variable "rds_log_retention_days" {
-  type = number
+  type    = number
   default = 365
 }
