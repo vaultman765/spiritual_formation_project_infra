@@ -34,3 +34,8 @@ variable "frontend_distribution_id" {
 variable "aws_acct_num" {
   type = string
 }
+variable "log_bucket_name" {
+  type = string
+  default = null 
+  }
+

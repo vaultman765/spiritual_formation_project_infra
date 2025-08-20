@@ -76,6 +76,12 @@ resource "aws_cloudfront_distribution" "static" {
 
   default_root_object = "" # static only; no index.html assumed
 
+  logging_config {
+    bucket          = var.log_bucket_name == null ? null : "${var.log_bucket_name}.s3.amazonaws.com"
+    include_cookies = false
+    prefix          = "cloudfront/${var.domain_name}/"
+  }
+
   tags = {
     Project     = var.project
     Environment = var.env

@@ -125,6 +125,12 @@ resource "aws_cloudfront_distribution" "this" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
+  logging_config {
+    bucket          = var.log_bucket_name == null ? null : "${var.log_bucket_name}.s3.amazonaws.com"
+    include_cookies = false
+    prefix          = "cloudfront/${var.domain_name}/"
+  }
+
   tags = {
     Project     = var.project
     Environment = var.env

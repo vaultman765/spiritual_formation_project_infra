@@ -15,6 +15,8 @@ module "static_admin_staging" {
   env     = var.env
   region  = var.region
 
+  log_bucket_name = module.logging.log_bucket_name
+
   bucket_name         = var.metadata_bucket
   origin_path         = ""
   domain_name         = "static.staging.${var.root_domain_name}"

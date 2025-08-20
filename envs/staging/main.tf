@@ -70,6 +70,12 @@ module "vpc_endpoints" {
   enable_logs           = !var.staging_low_cost
 }
 
+module "logging" {
+  source      = "../../modules/logging"
+  name_prefix = var.name_prefix
+  tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
+}
+
 module "cf_policies" {
   source     = "../../modules/cloudfront_policies"
   name_prefix = var.name_prefix

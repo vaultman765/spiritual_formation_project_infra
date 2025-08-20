@@ -14,6 +14,8 @@ module "frontend_staging" {
   env     = var.env
   region  = var.region
 
+  log_bucket_name = module.logging.log_bucket_name
+
   domain_name         = var.frontend_domain_name
   hosted_zone_name    = var.root_domain_name
   acm_certificate_arn = module.route53_acm_frontend_staging.certificate_arn
