@@ -4,6 +4,8 @@ module "s3" {
   env          = var.env
   aws_acct_num = var.aws_acct_num
 
+  log_bucket_name = module.logging.log_bucket_name
+
   # Keep metadata bucket + policy (needed for admin/static and docs/images)
   static_admin_distribution_id = module.static_admin_staging.distribution_id
 

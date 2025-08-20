@@ -25,3 +25,22 @@ resource "aws_s3_bucket_public_access_block" "logs" {
   ignore_public_acls      = true
   restrict_public_buckets = true
 }
+
+# Expire raw logs after 30 days
+resource "aws_s3_bucket_lifecycle_configuration" "logs" {
+  bucket = aws_s3_bucket.logs.id
+
+  rule {
+    id     = "expire-logs-30d"
+    status = "Enabled"
+    filter {} # Required by AWS provider
+
+    expiration {
+      days = 30
+    }
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
