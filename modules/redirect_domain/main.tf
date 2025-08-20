@@ -3,71 +3,125 @@ terraform {
     aws = {
       source  = "hashicorp/aws"
       version = ">= 5.0"
-      # We assume caller passes aws.us_east_1 for CF/ACM
+      # CloudFront & ACM must run in us-east-1
       configuration_aliases = [aws.us_east_1]
     }
   }
 }
 
 locals {
-  tags = {
-    Project   = var.project
-    Env       = var.env
-    ManagedBy = "Terraform"
-  }
+  # Helpful text and tagging
+  comment = var.comment != "" ? var.comment : "Redirect: ${join(", ", var.from_domains)} -> ${var.to_domain}"
+  tags = merge(
+    {
+      Project   = var.project
+      Env       = var.env
+      ManagedBy = "Terraform"
+    },
+    var.extra_tags
+  )
 }
 
-# CloudFront Function: 301 to target_host, preserve path+query
+# ---------------- ACM (us-east-1) ----------------
+# One cert that covers ALL source hostnames (SANs)
+resource "aws_acm_certificate" "cert" {
+  provider                  = aws.us_east_1
+  domain_name               = var.from_domains[0]
+  validation_method         = "DNS"
+  subject_alternative_names = length(var.from_domains) > 1 ? slice(var.from_domains, 1, length(var.from_domains)) : null
+
+  tags = local.tags
+}
+
+# Create DNS validation records in the provided hosted zone
+resource "aws_route53_record" "validation" {
+  for_each = {
+    for dvo in aws_acm_certificate.cert.domain_validation_options :
+    dvo.domain_name => {
+      name   = dvo.resource_record_name
+      type   = dvo.resource_record_type
+      record = dvo.resource_record_value
+    }
+  }
+
+  zone_id = var.hosted_zone_id
+  name    = each.value.name
+  type    = each.value.type
+  ttl     = 60
+  records = [each.value.record]
+}
+
+resource "aws_acm_certificate_validation" "cert" {
+  provider                = aws.us_east_1
+  certificate_arn         = aws_acm_certificate.cert.arn
+  validation_record_fqdns = [for r in aws_route53_record.validation : r.fqdn]
+}
+
+# ---------------- CloudFront Function (viewer-request) ----------------
+# 301 redirect to the target domain, preserving path + query string
 resource "aws_cloudfront_function" "redirect" {
-  name    = "${var.project}-${var.env}-redir"
+  provider = aws.us_east_1
+
+  name    = "${var.name_prefix}-redirect"
   runtime = "cloudfront-js-2.0"
-  comment = "Redirect ${join(", ", var.source_domains)} -> ${var.target_host}"
+  publish = true
+  comment = local.comment
 
   code = <<-JS
     function handler(event) {
       var req = event.request;
-      var location = "https://${var.target_host}" + req.uri;
+      var location = "https://${var.to_domain}" + req.uri;
+
+      // preserve query string (CloudFront passes as a map)
       if (req.querystring && Object.keys(req.querystring).length > 0) {
         var qs = [];
         for (var k in req.querystring) {
-          var v = req.querystring[k].value;
-          if (v !== undefined && v !== null && v !== "") {
-            qs.push(encodeURIComponent(k) + "=" + encodeURIComponent(v));
+          var q = req.querystring[k];
+          // q is { value: "..." } or {}
+          if (q && typeof q.value !== "undefined" && q.value !== null && q.value !== "") {
+            qs.push(encodeURIComponent(k) + "=" + encodeURIComponent(q.value));
           } else {
             qs.push(encodeURIComponent(k));
           }
         }
         location += "?" + qs.join("&");
       }
+
       return {
         statusCode: 301,
         statusDescription: "Moved Permanently",
         headers: {
-          "location":       { "value": location },
-          "cache-control":  { "value": "public, max-age=300" }
+          "location":      { "value": location },
+          "cache-control": { "value": "public, max-age=${var.browser_cache_seconds}" }
         }
       };
     }
   JS
 }
 
-# Dummy origin (never hit; function returns at viewer-request)
+# ---------------- CloudFront Distribution ----------------
+# Uses a dummy HTTPS origin; the function returns immediately on viewer-request
 resource "aws_cloudfront_distribution" "this" {
   provider = aws.us_east_1
 
-  enabled         = true
-  is_ipv6_enabled = true
-  comment         = "Redirect: ${join(", ", var.source_domains)} -> ${var.target_host}"
-  aliases         = var.source_domains
+  enabled             = true
+  is_ipv6_enabled     = true
+  comment             = local.comment
+  aliases             = var.from_domains
+  price_class         = var.price_class
+  wait_for_deployment = true
+  tags                = local.tags
 
   origin {
     domain_name = "example.com"
     origin_id   = "dummy-origin"
     custom_origin_config {
-      http_port              = 80
-      https_port             = 443
-      origin_protocol_policy = "https-only"
-      origin_ssl_protocols   = ["TLSv1.2"]
+      http_port                = 80
+      https_port               = 443
+      origin_protocol_policy   = "https-only"
+      origin_ssl_protocols     = ["TLSv1.2"]
+      origin_keepalive_timeout = 5
+      origin_read_timeout      = 30
     }
   }
 
@@ -76,53 +130,43 @@ resource "aws_cloudfront_distribution" "this" {
     viewer_protocol_policy = "redirect-to-https"
     allowed_methods        = ["GET", "HEAD"]
     cached_methods         = ["GET", "HEAD"]
-
-    function_association {
-      event_type   = "viewer-request"
-      function_arn = aws_cloudfront_function.redirect.arn
-    }
+    min_ttl                = 0
+    default_ttl            = 300
+    max_ttl                = 300
 
     forwarded_values {
       query_string = true
       cookies { forward = "none" }
     }
 
-    min_ttl     = 0
-    default_ttl = 300
-    max_ttl     = 300
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.redirect.arn
+    }
   }
-
-  price_class = var.price_class
 
   restrictions {
     geo_restriction { restriction_type = "none" }
   }
 
   viewer_certificate {
-    acm_certificate_arn      = var.acm_certificate_arn   # must be us-east-1
+    acm_certificate_arn      = aws_acm_certificate_validation.cert.certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
   }
-
-  tags = local.tags
 }
 
-# Route53 A/ALIAS for each source domain -> this CF distribution
-data "aws_route53_zone" "root" {
-  # Note: the caller env will pass the default aws provider for the zone region/account
-  name         = regex("\\.(.*)$", var.source_domains[0]) != null ? regex("\\.(.*)$", var.source_domains[0])[0] : var.source_domains[0]
-  private_zone = false
-}
-
+# ---------------- Route53 Alias A records ----------------
 resource "aws_route53_record" "alias" {
-  for_each = toset(var.source_domains)
+  for_each = toset(var.from_domains)
 
-  zone_id = data.aws_route53_zone.root.zone_id
+  zone_id = var.hosted_zone_id
   name    = each.value
   type    = "A"
+
   alias {
     name                   = aws_cloudfront_distribution.this.domain_name
-    zone_id                = "Z2FDTNDATAQYW2" # CloudFront global zone id
+    zone_id                = "Z2FDTNDATAQYW2" # CloudFront constant
     evaluate_target_health = false
   }
 }

@@ -1,5 +1,5 @@
 locals {
-  name       = "${var.project}-${var.env}-clientvpn"
+  name       = "${var.name_prefix}-clientvpn"
   tags       = { Project = var.project, Env = var.env, Managed = "Terraform" }
   vpc_dns_ip = cidrhost(data.aws_vpc.this.cidr_block, 2)
 }

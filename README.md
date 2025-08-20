@@ -19,3 +19,23 @@ aws ecs run-task \
     }]
   }'
 ```
+
+### Terraform-docs
+
+``` bash
+terraform-docs markdown --config=../../.terraform-docs.yml .
+```
+
+### Checkov report
+
+#### Run the reports for json and sarif
+
+```bash
+checkov -d . --framework terraform --download-external-modules true --quiet --compact --output json --output-file-path "./checkov-results/" --output sarif --output-file-path "./checkov-results/"
+```
+
+#### Run the summarize script for a summary json of the report
+
+```bash
+bash scripts/summarize-checkov.sh checkov-results/results_json.json > checkov-results/summary.json
+```

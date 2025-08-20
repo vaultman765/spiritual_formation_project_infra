@@ -29,10 +29,10 @@ locals {
 
 # ACM cert in us-east-1 (required for App Runner/CloudFront)
 resource "aws_acm_certificate" "cert" {
-  domain_name       = var.domain_name
+  domain_name               = var.domain_name
   subject_alternative_names = var.subject_alternative_names
-  validation_method = "DNS"
-  provider          = aws.us_east_1
+  validation_method         = "DNS"
+  provider                  = aws.us_east_1
 
   lifecycle {
     create_before_destroy = true

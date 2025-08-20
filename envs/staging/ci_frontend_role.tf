@@ -3,7 +3,7 @@
 ###########################################################
 
 module "ci_frontend_role_staging" {
-  source = "../../modules/github_oidc_deploy_role"
+  source = "../../modules/ci_frontend_policies"
 
   role_name   = "sf-frontend-deploy-staging"
   github_org  = var.github_owner

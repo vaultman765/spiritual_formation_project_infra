@@ -1,5 +1,6 @@
 variable "project" { type = string }
 variable "env" { type = string }
+variable "name_prefix" { type = string }
 variable "vpc_id" { type = string }
 variable "private_subnet_ids" { type = list(string) } # associate at least 2 AZs
 variable "server_certificate_arn" { type = string }   # ACM ARN from Step 1

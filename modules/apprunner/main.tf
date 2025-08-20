@@ -186,7 +186,7 @@ resource "aws_apprunner_service" "this" {
   }
   depends_on = [
     aws_iam_role.service,
-    aws_iam_role_policy_attachment.service_ecr,  # ← wait for policy to attach
+    aws_iam_role_policy_attachment.service_ecr, # ← wait for policy to attach
   ]
 }
 

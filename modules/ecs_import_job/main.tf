@@ -1,5 +1,5 @@
 locals {
-  name = "${var.project}-${var.env}-import"
+  name = "${var.name_prefix}-import"
   tags = { Project = var.project, Env = var.env, Managed = "Terraform", Role = "ImportJob" }
 }
 
