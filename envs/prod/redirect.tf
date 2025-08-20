@@ -7,7 +7,8 @@ module "redirect_mwc_prod" {
   }
 
   project        = "var.project"
-  env            = "var.env"
+  project        = var.project
+  env            = var.env
   name_prefix    = "${var.name_prefix}-prod-redir"
   hosted_zone_id = "<ZONE_ID_FOR_meditationwithchrist.com>"
 
