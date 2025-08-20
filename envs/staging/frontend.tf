@@ -18,6 +18,8 @@ module "frontend_staging" {
   hosted_zone_name    = var.root_domain_name
   acm_certificate_arn = module.route53_acm_frontend_staging.certificate_arn
 
+  response_headers_policy_id = module.cf_policies.security_headers_policy_id
+
   # Optional overrides
   # bucket_name  = "staging-catholicmentalprayer-com-frontend" # uncomment if you want a fixed name
   price_class = "PriceClass_100"

@@ -65,3 +65,7 @@ variable "min_ttl" {
   type    = number
   default = 0
 }
+variable "response_headers_policy_id" {
+  type    = string
+  default = null
+}

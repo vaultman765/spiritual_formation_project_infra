@@ -69,3 +69,8 @@ module "vpc_endpoints" {
   enable_ecr_dkr        = !var.staging_low_cost
   enable_logs           = !var.staging_low_cost
 }
+
+module "cf_policies" {
+  source     = "../../modules/cloudfront_policies"
+  name_prefix = var.name_prefix
+}

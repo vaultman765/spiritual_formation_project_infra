@@ -99,6 +99,8 @@ resource "aws_cloudfront_distribution" "this" {
     min_ttl     = var.min_ttl
     default_ttl = var.default_ttl
     max_ttl     = var.max_ttl
+
+    response_headers_policy_id = var.response_headers_policy_id
   }
 
   dynamic "custom_error_response" {
