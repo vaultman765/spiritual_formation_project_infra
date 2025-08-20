@@ -11,10 +11,15 @@ data "aws_iam_policy_document" "assume_role" {
       variable = "token.actions.githubusercontent.com:aud"
       values   = ["sts.amazonaws.com"]
     }
+
+    # Restrict to specific repo AND refs (branches/tags) you pass in.
+    # Example values:
+    #   - "repo:owner/repo:ref:refs/heads/main"
+    #   - "repo:owner/repo:ref:refs/tags/v*"
     condition {
       test     = "StringLike"
       variable = "token.actions.githubusercontent.com:sub"
-      values   = ["repo:${var.github_owner}/${var.github_repo}:*"]
+      values   = [for ref in var.github_refs : "repo:${var.github_owner}/${var.github_repo}:${ref}"]
     }
   }
 }

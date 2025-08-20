@@ -1,9 +1,8 @@
 variable "project" { type = string }
 variable "env" {
-  type    = string
-  default = "staging"
+  type = string
 }
-
+variable "name_prefix" { type = string }
 variable "private_subnet_ids" { type = list(string) }
 variable "security_group_id" { type = string } # ecs tasks sg
 

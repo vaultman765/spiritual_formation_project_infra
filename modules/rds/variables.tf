@@ -48,8 +48,9 @@ variable "final_snapshot_prefix" {
 
 # Who may reach Postgres (we pass SG IDs from the env)
 variable "allowed_sg_ids" {
-  type    = map(string)
-  default = {}
+  description = "List of security group IDs allowed to reach Postgres (tcp/5432)"
+  type        = list(string)
+  default     = []
 }
 variable "admin_cidr_blocks" {
   type    = list(string)

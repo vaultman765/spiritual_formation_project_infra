@@ -29,7 +29,43 @@ module "vpc" {
   enabled          = var.staging_infra_enabled
   nat_gateway_mode = var.staging_low_cost ? "none" : "single"
 
-  # Nice naming/tags
+  # Naming/tags
   name_prefix = local.name_prefix
   tags        = local.common_tags
+}
+
+module "vpc_endpoints" {
+  source = "../../modules/vpc/endpoints"
+
+  # identity / naming
+  project     = var.project
+  env         = var.env
+  name_prefix = var.name_prefix
+  region      = var.region
+
+  # where to place the endpoints
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnet_ids
+
+  # keep behavior: allow 443 from entire VPC CIDR + explicit SGs
+  allow_from_vpc_cidr = true
+  allowed_sg_ids = {
+    ecs_tasks = aws_security_group.ecs_tasks.id
+    # if App Runner VPC connector should reach endpoints too, include it:
+    # apprunner_connector = aws_security_group.apprunner_connector.id
+  }
+
+  tags = {
+    Project = var.project
+    Env     = var.env
+    Managed = "Terraform"
+    Purpose = "VpcEndpoints"
+  }
+
+  # preserve your low-cost toggle:
+  # when true, skip interface endpoints and (elsewhere) run jobs via public subnets
+  enable_secretsmanager = !var.staging_low_cost
+  enable_ecr_api        = !var.staging_low_cost
+  enable_ecr_dkr        = !var.staging_low_cost
+  enable_logs           = !var.staging_low_cost
 }

@@ -9,7 +9,6 @@ terraform {
 data "aws_region" "current" {}
 
 locals {
-  name = "${var.project}-${var.env}"
   tags = {
     Project   = var.project
     Env       = var.env
@@ -44,9 +43,9 @@ resource "aws_security_group" "rds" {
 
 # Allow from provided SGs (App Runner VPC connector SG and ECS tasks SG)
 resource "aws_vpc_security_group_ingress_rule" "from_sgs" {
-  for_each                     = var.enabled ? var.allowed_sg_ids : {}
+  count                        = var.enabled ? length(var.allowed_sg_ids) : 0
   security_group_id            = aws_security_group.rds[0].id
-  referenced_security_group_id = each.value
+  referenced_security_group_id = var.allowed_sg_ids[count.index]
   ip_protocol                  = "tcp"
   from_port                    = 5432
   to_port                      = 5432

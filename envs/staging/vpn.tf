@@ -2,6 +2,7 @@ module "client_vpn" {
   source                 = "../../modules/client_vpn"
   project                = var.project
   env                    = var.env
+  name_prefix            = var.name_prefix
   count                  = var.vpn_enabled ? 1 : 0
   vpc_id                 = module.vpc.vpc_id
   private_subnet_ids     = module.vpc.private_subnet_ids

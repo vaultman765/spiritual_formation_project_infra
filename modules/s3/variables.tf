@@ -10,13 +10,13 @@ variable "metadata_bucket_name" {
 # Default false since cloudfront_site owns the bucket
 variable "create_frontend_bucket" {
   type    = bool
-  default = false  
+  default = false
 }
 
 # Optional: only used if you want a policy here
 variable "frontend_bucket_name" {
   type    = string
-  default = ""     
+  default = ""
 }
 
 variable "static_admin_distribution_id" {

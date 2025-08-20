@@ -19,7 +19,6 @@ output "public_subnet_ids" { value = module.vpc.public_subnet_ids }
 output "private_subnet_ids" { value = module.vpc.private_subnet_ids }
 output "rds_endpoint" { value = module.rds.db_endpoint }
 output "rds_secret" { value = module.rds.secret_arn }
-output "github_infra_role_arn" { value = module.github_oidc_infra.role_arn }
 output "github_oidc_provider_arn" { value = module.github_oidc_infra.oidc_provider_arn }
 output "ecr_backend_url" { value = module.ecr_backend.repo_url }
 output "ecr_backend_arn" { value = module.ecr_backend.repo_arn }
@@ -74,3 +73,16 @@ output "static_acm_arn" {
   value       = module.route53_acm_static_staging.certificate_arn
   description = "ACM ARN for static.staging.catholicmentalprayer.com"
 }
+output "eventbridge_rule_name" {
+  value       = module.eventbridge_import.rule_name
+  description = "EventBridge rule that triggers the import task."
+}
+output "eventbridge_role_arn" {
+  value       = module.eventbridge_import.role_arn
+  description = "IAM role EventBridge assumes to run the ECS task."
+}
+output "vpc_endpoints_sg_id" { value = module.vpc_endpoints.sg_id }
+output "vpce_secretsmanager_id" { value = module.vpc_endpoints.secretsmanager_endpoint_id }
+output "vpce_ecr_api_id" { value = module.vpc_endpoints.ecr_api_endpoint_id }
+output "vpce_ecr_dkr_id" { value = module.vpc_endpoints.ecr_dkr_endpoint_id }
+output "vpce_logs_id" { value = module.vpc_endpoints.logs_endpoint_id }

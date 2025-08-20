@@ -1,5 +1,4 @@
 locals {
-  name                 = "${var.project}-${var.env}"
   metadata_bucket_name = var.metadata_bucket_name != "" ? var.metadata_bucket_name : "spiritual-formation-${var.env}"
   frontend_bucket_name = var.frontend_bucket_name != "" ? var.frontend_bucket_name : "spiritual-formation-frontend-${var.env}"
   tags = {
