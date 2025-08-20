@@ -2,10 +2,22 @@
   "totals_by_severity": [
     {
       "severity": null,
-      "count": 86
+      "count": 85
     }
   ],
   "top_checks": [
+    {
+      "check_id": "CKV_AWS_144",
+      "name": "Ensure that S3 bucket has cross-region replication enabled",
+      "severity": null,
+      "count": 5
+    },
+    {
+      "check_id": "CKV_AWS_145",
+      "name": "Ensure that S3 buckets are encrypted with KMS by default",
+      "severity": null,
+      "count": 5
+    },
     {
       "check_id": "CKV2_AWS_32",
       "name": "Ensure CloudFront distribution has a response headers policy attached",
@@ -19,26 +31,14 @@
       "count": 4
     },
     {
-      "check_id": "CKV2_AWS_61",
-      "name": "Ensure that an S3 bucket has a lifecycle configuration",
+      "check_id": "CKV2_AWS_62",
+      "name": "Ensure S3 buckets should have event notifications enabled",
       "severity": null,
       "count": 4
     },
     {
-      "check_id": "CKV_AWS_144",
-      "name": "Ensure that S3 bucket has cross-region replication enabled",
-      "severity": null,
-      "count": 4
-    },
-    {
-      "check_id": "CKV_AWS_145",
-      "name": "Ensure that S3 buckets are encrypted with KMS by default",
-      "severity": null,
-      "count": 4
-    },
-    {
-      "check_id": "CKV_AWS_18",
-      "name": "Ensure the S3 bucket has access logging enabled",
+      "check_id": "CKV_AWS_158",
+      "name": "Ensure that CloudWatch Log Group is encrypted by KMS",
       "severity": null,
       "count": 4
     },
@@ -67,12 +67,6 @@
       "count": 4
     },
     {
-      "check_id": "CKV_AWS_86",
-      "name": "Ensure CloudFront distribution has Access Logging enabled",
-      "severity": null,
-      "count": 4
-    },
-    {
       "check_id": "CKV2_AWS_38",
       "name": "Ensure Domain Name System Security Extensions (DNSSEC) signing is enabled for Amazon Route 53 public hosted zones",
       "severity": null,
@@ -91,14 +85,8 @@
       "count": 3
     },
     {
-      "check_id": "CKV2_AWS_62",
-      "name": "Ensure S3 buckets should have event notifications enabled",
-      "severity": null,
-      "count": 3
-    },
-    {
-      "check_id": "CKV_AWS_158",
-      "name": "Ensure that CloudWatch Log Group is encrypted by KMS",
+      "check_id": "CKV_AWS_18",
+      "name": "Ensure the S3 bucket has access logging enabled",
       "severity": null,
       "count": 3
     },
@@ -115,6 +103,12 @@
       "count": 3
     },
     {
+      "check_id": "CKV2_AWS_61",
+      "name": "Ensure that an S3 bucket has a lifecycle configuration",
+      "severity": null,
+      "count": 2
+    },
+    {
       "check_id": "CKV_AWS_233",
       "name": "Ensure Create before destroy for ACM certificates",
       "severity": null,
@@ -123,6 +117,12 @@
     {
       "check_id": "CKV_AWS_338",
       "name": "Ensure CloudWatch log groups retains logs for at least 1 year",
+      "severity": null,
+      "count": 2
+    },
+    {
+      "check_id": "CKV_AWS_86",
+      "name": "Ensure CloudFront distribution has Access Logging enabled",
       "severity": null,
       "count": 2
     },
@@ -151,8 +151,8 @@
       "count": 1
     },
     {
-      "check_id": "CKV2_AWS_60",
-      "name": "Ensure RDS instance with copy tags to snapshots is enabled",
+      "check_id": "CKV2_AWS_65",
+      "name": "Ensure access control lists for S3 buckets are disabled",
       "severity": null,
       "count": 1
     }
@@ -160,7 +160,7 @@
   "noisiest_files": [
     {
       "file": "\\main.tf",
-      "count": 39
+      "count": 40
     },
     {
       "file": "\\modules\\redirect_domain\\main.tf",
@@ -171,19 +171,19 @@
       "count": 8
     },
     {
-      "file": "\\modules\\cloudfront_static\\main.tf",
-      "count": 5
-    },
-    {
       "file": "\\modules\\client_vpn\\main.tf",
       "count": 4
     },
     {
-      "file": "\\modules\\cloudfront_site\\main.tf",
+      "file": "\\modules\\cloudfront_static\\main.tf",
       "count": 4
     },
     {
       "file": "\\modules\\apprunner\\main.tf",
+      "count": 3
+    },
+    {
+      "file": "\\modules\\cloudfront_site\\main.tf",
       "count": 3
     },
     {
@@ -203,7 +203,7 @@
       "count": 2
     },
     {
-      "file": "\\bootsrap\\main.tf",
+      "file": "\\bootstrap\\main.tf",
       "count": 1
     },
     {
