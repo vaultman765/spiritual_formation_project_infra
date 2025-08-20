@@ -45,3 +45,22 @@ variable "nat_gateway_mode" {
     error_message = "nat_gateway_mode must be one of: single, per_az, none"
   }
 }
+
+# --- Flow Logs (optional) ---
+variable "enable_flow_logs" {
+  type        = bool
+  default     = false
+  description = "Enable VPC Flow Logs to CloudWatch Logs."
+}
+
+variable "flow_logs_retention_days" {
+  type        = number
+  default     = 30
+  description = "Retention (days) for the VPC Flow Logs CloudWatch Log Group."
+}
+
+variable "flow_logs_kms_key_arn" {
+  type        = string
+  default     = ""
+  description = "Optional KMS key ARN to encrypt the VPC Flow Logs log group. If empty, no KMS key is used."
+}

@@ -65,6 +65,11 @@ resource "aws_s3_bucket_notification" "site_events" {
   eventbridge = true
 }
 
+resource "aws_s3_bucket_ownership_controls" "site" {
+  bucket = aws_s3_bucket.site.id
+  rule { object_ownership = "BucketOwnerEnforced" }
+}
+
 # ---------------- CloudFront OAI ----------------
 resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = "OAI for ${var.domain_name}"

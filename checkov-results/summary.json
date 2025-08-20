@@ -2,7 +2,7 @@
   "totals_by_severity": [
     {
       "severity": null,
-      "count": 70
+      "count": 71
     }
   ],
   "top_checks": [
@@ -73,6 +73,12 @@
       "count": 3
     },
     {
+      "check_id": "CKV_AWS_338",
+      "name": "Ensure CloudWatch log groups retains logs for at least 1 year",
+      "severity": null,
+      "count": 3
+    },
+    {
       "check_id": "CKV_AWS_374",
       "name": "Ensure AWS CloudFront web distribution has geo restriction enabled",
       "severity": null,
@@ -93,12 +99,6 @@
     {
       "check_id": "CKV_AWS_18",
       "name": "Ensure the S3 bucket has access logging enabled",
-      "severity": null,
-      "count": 2
-    },
-    {
-      "check_id": "CKV_AWS_338",
-      "name": "Ensure CloudWatch log groups retains logs for at least 1 year",
       "severity": null,
       "count": 2
     },
@@ -199,6 +199,10 @@
       "count": 2
     },
     {
+      "file": "\\modules\\vpc\\main.tf",
+      "count": 2
+    },
+    {
       "file": "\\security-groups.tf",
       "count": 2
     },
@@ -208,10 +212,6 @@
     },
     {
       "file": "\\envs\\staging\\security-groups.tf",
-      "count": 1
-    },
-    {
-      "file": "\\modules\\vpc\\main.tf",
       "count": 1
     }
   ]

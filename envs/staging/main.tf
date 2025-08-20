@@ -29,6 +29,11 @@ module "vpc" {
   enabled          = var.staging_infra_enabled
   nat_gateway_mode = var.staging_low_cost ? "none" : "single"
 
+  # Prod options
+  enable_flow_logs         = var.vpc_enable_flow_logs
+  flow_logs_retention_days = var.vpc_flow_logs_retention_days
+  flow_logs_kms_key_arn    = var.vpc_flow_logs_kms_key_arn
+
   # Naming/tags
   name_prefix = local.name_prefix
   tags        = local.common_tags
