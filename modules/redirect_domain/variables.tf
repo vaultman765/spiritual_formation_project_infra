@@ -23,3 +23,13 @@ variable "extra_tags" {
   type    = map(string)
   default = {}
 }
+
+variable "response_headers_policy_id" {
+  type    = string
+  default = null
+}
+
+variable "log_bucket_name" {
+  type    = string
+  default = null
+}

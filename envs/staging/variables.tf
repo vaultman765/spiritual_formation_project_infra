@@ -218,3 +218,22 @@ variable "csrf_trusted_origins" {
   type        = string
   description = "Comma-separated list of CSRF trusted origins."
 }
+
+# Prod variables
+variable "vpc_enable_flow_logs" {
+  type        = bool
+  default     = false
+  description = "Enable VPC Flow Logs to CloudWatch Logs."
+}
+
+variable "vpc_flow_logs_retention_days" {
+  type        = number
+  default     = 30
+  description = "Retention (days) for the VPC Flow Logs CloudWatch Log Group."
+}
+
+variable "vpc_flow_logs_kms_key_arn" {
+  type        = string
+  default     = ""
+  description = "Optional KMS key ARN to encrypt the VPC Flow Logs log group. If empty, no KMS key is used."
+}

@@ -94,3 +94,38 @@ variable "secret_name" {
   default = ""
   # if empty we compute: spiritual/<env>/rds/app
 }
+
+# Backups & protection (safe defaults for staging; override in prod)
+variable "backup_retention_period" {
+  type    = number
+  default = 3
+} # prod: 7+
+variable "deletion_protection" {
+  type    = bool
+  default = false
+} # prod: true
+
+# CloudWatch Logs exports for RDS
+# Checkov expects "postgresql" to be exported; add others as needed
+variable "enabled_cloudwatch_logs_exports" {
+  type    = list(string)
+  default = ["postgresql"]
+}
+
+# Query logging settings (parameter group)
+#  - log_min_duration_statement: ms threshold (5000ms default to avoid noise)
+#  - log_statement: none | ddl | mod | all
+variable "rds_log_min_duration_ms" {
+  type    = number
+  default = 5000
+}
+variable "rds_log_statement" {
+  type    = string
+  default = "none"
+} # prod can tune if desired
+
+# CloudWatch retention for RDS log groups (days)
+variable "rds_log_retention_days" {
+  type    = number
+  default = 365
+}

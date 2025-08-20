@@ -25,6 +25,28 @@ resource "aws_s3_bucket" "site" {
   }
 }
 
+resource "aws_s3_bucket_logging" "site" {
+  count = var.log_bucket_name == null ? 0 : 1
+
+  bucket        = aws_s3_bucket.site.id
+  target_bucket = var.log_bucket_name
+  target_prefix = "s3/site/${var.domain_name}/"
+}
+
+resource "aws_s3_bucket_lifecycle_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+  rule {
+    id     = "expire-noncurrent-7d"
+    status = "Enabled"
+    filter {}
+    noncurrent_version_expiration { noncurrent_days = 7 }
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
 resource "aws_s3_bucket_versioning" "site" {
   bucket = aws_s3_bucket.site.id
   versioning_configuration { status = "Enabled" }
@@ -36,6 +58,16 @@ resource "aws_s3_bucket_public_access_block" "site" {
   block_public_policy     = true
   ignore_public_acls      = true
   restrict_public_buckets = true
+}
+
+resource "aws_s3_bucket_notification" "site_events" {
+  bucket      = aws_s3_bucket.site.id
+  eventbridge = true
+}
+
+resource "aws_s3_bucket_ownership_controls" "site" {
+  bucket = aws_s3_bucket.site.id
+  rule { object_ownership = "BucketOwnerEnforced" }
 }
 
 # ---------------- CloudFront OAI ----------------
@@ -99,6 +131,8 @@ resource "aws_cloudfront_distribution" "this" {
     min_ttl     = var.min_ttl
     default_ttl = var.default_ttl
     max_ttl     = var.max_ttl
+
+    response_headers_policy_id = var.response_headers_policy_id
   }
 
   dynamic "custom_error_response" {
@@ -121,6 +155,12 @@ resource "aws_cloudfront_distribution" "this" {
     acm_certificate_arn      = var.acm_certificate_arn # must be in us-east-1
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
+  }
+
+  logging_config {
+    bucket          = var.log_bucket_name == null ? null : "${var.log_bucket_name}.s3.amazonaws.com"
+    include_cookies = false
+    prefix          = "cloudfront/${var.domain_name}/"
   }
 
   tags = {

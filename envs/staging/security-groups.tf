@@ -1,7 +1,7 @@
 # Security group for the future App Runner VPC connector
 resource "aws_security_group" "apprunner_connector" {
-  name   = "${var.name_prefix}-apprunner-connector-sg"
-  vpc_id = module.vpc.vpc_id
+  name        = "${var.name_prefix}-apprunner-connector-sg"
+  vpc_id      = module.vpc.vpc_id
   description = "App Runner VPC connector SG"
   tags = {
     Project = var.project

@@ -121,3 +121,75 @@ resource "aws_vpc_endpoint" "s3" {
 
   tags = merge(local.tags, { Name = "${var.name_prefix}-s3-endpoint" })
 }
+
+# --- CloudWatch Log Group for VPC Flow Logs ---
+resource "aws_cloudwatch_log_group" "vpc_flow" {
+  count = var.enabled && var.enable_flow_logs ? 1 : 0
+
+  name              = "/aws/vpc/${var.name_prefix}/flow-logs"
+  retention_in_days = var.flow_logs_retention_days
+
+  # KMS is optional to keep staging simple; pass an ARN in prod
+  kms_key_id = var.flow_logs_kms_key_arn != "" ? var.flow_logs_kms_key_arn : null
+
+  tags = merge(local.tags, { Name = "${var.name_prefix}-vpc-flow-logs" })
+}
+
+# --- IAM role for VPC Flow Logs to write to CloudWatch Logs ---
+data "aws_iam_policy_document" "vpc_flow_assume" {
+  statement {
+    actions = ["sts:AssumeRole"]
+    principals {
+      type        = "Service"
+      identifiers = ["vpc-flow-logs.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_role" "vpc_flow" {
+  count              = var.enabled && var.enable_flow_logs ? 1 : 0
+  name               = "${var.name_prefix}-vpc-flow-logs-role"
+  assume_role_policy = data.aws_iam_policy_document.vpc_flow_assume.json
+  tags               = local.tags
+}
+
+# Permissions for Flow Logs to write to CW Logs
+data "aws_iam_policy_document" "vpc_flow_policy" {
+  statement {
+    actions = [
+      "logs:CreateLogStream",
+      "logs:PutLogEvents",
+      "logs:DescribeLogGroups",
+      "logs:DescribeLogStreams"
+    ]
+    resources = [
+      var.enable_flow_logs ? "${aws_cloudwatch_log_group.vpc_flow[0].arn}:*" : ""
+    ]
+  }
+}
+
+resource "aws_iam_policy" "vpc_flow" {
+  count  = var.enabled && var.enable_flow_logs ? 1 : 0
+  name   = "${var.name_prefix}-vpc-flow-logs-policy"
+  policy = data.aws_iam_policy_document.vpc_flow_policy.json
+  tags   = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "vpc_flow_attach" {
+  count      = var.enabled && var.enable_flow_logs ? 1 : 0
+  role       = aws_iam_role.vpc_flow[0].name
+  policy_arn = aws_iam_policy.vpc_flow[0].arn
+}
+
+# --- VPC Flow Log resource ---
+resource "aws_flow_log" "this" {
+  count = var.enabled && var.enable_flow_logs ? 1 : 0
+
+  vpc_id               = aws_vpc.this[0].id
+  log_destination_type = "cloud-watch-logs"
+  log_destination      = aws_cloudwatch_log_group.vpc_flow[0].arn
+  iam_role_arn         = aws_iam_role.vpc_flow[0].arn
+  traffic_type         = "ALL"
+
+  tags = merge(local.tags, { Name = "${var.name_prefix}-vpc-flow-logs" })
+}

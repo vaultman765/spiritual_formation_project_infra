@@ -85,6 +85,19 @@ resource "aws_db_parameter_group" "pg" {
     apply_method = "immediate"
   }
 
+  # Query logging (tunable via variables)
+  parameter {
+    name         = "log_min_duration_statement"
+    value        = tostring(var.rds_log_min_duration_ms)
+    apply_method = "immediate"
+  }
+
+  parameter {
+    name         = "log_statement"
+    value        = var.rds_log_statement
+    apply_method = "immediate"
+  }
+
   # Ensure the new PG is created before the old one is deleted
   lifecycle {
     create_before_destroy = true
@@ -134,7 +147,6 @@ resource "aws_db_instance" "this" {
 
   publicly_accessible = false
   multi_az            = var.multi_az
-  deletion_protection = false
   apply_immediately   = true
 
   # Guarantees groups exist before we modify the instance to use them
@@ -143,12 +155,22 @@ resource "aws_db_instance" "this" {
     aws_db_subnet_group.this,
   ]
 
+  # Backups & protection (env-gated via variables)
   backup_retention_period = 3
   backup_window           = "22:00-23:00"
   maintenance_window      = "Mon:00:00-Mon:01:00"
+  deletion_protection     = var.deletion_protection
+  copy_tags_to_snapshot   = true
 
   skip_final_snapshot       = false
   final_snapshot_identifier = "${var.final_snapshot_prefix}-${replace(time_static.final.rfc3339, ":", "-")}"
+
+  # Export engine logs to CloudWatch (for Checkov CKV2_AWS_30)
+  enabled_cloudwatch_logs_exports = var.enabled_cloudwatch_logs_exports
+
+  # (Optional but useful)
+  performance_insights_enabled = false # prod can override to true later
+
 
 
   tags = local.tags
@@ -180,4 +202,12 @@ data "aws_db_snapshot" "latest" {
   most_recent            = true
   db_instance_identifier = var.identifier
   snapshot_type          = "manual"
+}
+
+# Create log groups with explicit retention once the DB identifier is known.
+# We only create them when identifier is set (your env passes it).
+resource "aws_cloudwatch_log_group" "rds_postgresql" {
+  count             = var.enabled && var.identifier != "" ? 1 : 0
+  name              = "/aws/rds/instance/${var.identifier}/postgresql"
+  retention_in_days = var.rds_log_retention_days
 }

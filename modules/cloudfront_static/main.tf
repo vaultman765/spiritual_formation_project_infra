@@ -56,6 +56,8 @@ resource "aws_cloudfront_distribution" "static" {
     min_ttl     = var.min_ttl
     default_ttl = var.default_ttl
     max_ttl     = var.max_ttl
+
+    response_headers_policy_id = var.response_headers_policy_id
   }
 
   price_class = var.price_class
@@ -73,6 +75,12 @@ resource "aws_cloudfront_distribution" "static" {
   }
 
   default_root_object = "" # static only; no index.html assumed
+
+  logging_config {
+    bucket          = var.log_bucket_name == null ? null : "${var.log_bucket_name}.s3.amazonaws.com"
+    include_cookies = false
+    prefix          = "cloudfront/${var.domain_name}/"
+  }
 
   tags = {
     Project     = var.project

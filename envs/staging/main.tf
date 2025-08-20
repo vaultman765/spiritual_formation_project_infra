@@ -29,6 +29,11 @@ module "vpc" {
   enabled          = var.staging_infra_enabled
   nat_gateway_mode = var.staging_low_cost ? "none" : "single"
 
+  # Prod options
+  enable_flow_logs         = var.vpc_enable_flow_logs
+  flow_logs_retention_days = var.vpc_flow_logs_retention_days
+  flow_logs_kms_key_arn    = var.vpc_flow_logs_kms_key_arn
+
   # Naming/tags
   name_prefix = local.name_prefix
   tags        = local.common_tags
@@ -68,4 +73,15 @@ module "vpc_endpoints" {
   enable_ecr_api        = !var.staging_low_cost
   enable_ecr_dkr        = !var.staging_low_cost
   enable_logs           = !var.staging_low_cost
+}
+
+module "logging" {
+  source      = "../../modules/logging"
+  name_prefix = var.name_prefix
+  tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
+}
+
+module "cf_policies" {
+  source      = "../../modules/cloudfront_policies"
+  name_prefix = var.name_prefix
 }

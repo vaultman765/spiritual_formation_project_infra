@@ -30,6 +30,10 @@ resource "aws_acm_certificate" "cert" {
   validation_method         = "DNS"
   subject_alternative_names = length(var.from_domains) > 1 ? slice(var.from_domains, 1, length(var.from_domains)) : null
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   tags = local.tags
 }
 
@@ -103,6 +107,8 @@ resource "aws_cloudfront_function" "redirect" {
 # Uses a dummy HTTPS origin; the function returns immediately on viewer-request
 resource "aws_cloudfront_distribution" "this" {
   provider = aws.us_east_1
+  # checkov:skip=CKV_AWS_305 reason="Redirect-only distribution; default root object not applicable"
+  # (We’ll consider WAF/geo/origin-failover later or skip them intentionally.)
 
   enabled             = true
   is_ipv6_enabled     = true
@@ -125,6 +131,15 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
+  dynamic "logging_config" {
+    for_each = var.log_bucket_name == null ? [] : [1]
+    content {
+      bucket          = "${var.log_bucket_name}.s3.amazonaws.com"
+      include_cookies = false
+      prefix          = "cloudfront/redirect/${var.name_prefix}/"
+    }
+  }
+
   default_cache_behavior {
     target_origin_id       = "dummy-origin"
     viewer_protocol_policy = "redirect-to-https"
@@ -143,6 +158,8 @@ resource "aws_cloudfront_distribution" "this" {
       event_type   = "viewer-request"
       function_arn = aws_cloudfront_function.redirect.arn
     }
+
+    response_headers_policy_id = var.response_headers_policy_id
   }
 
   restrictions {

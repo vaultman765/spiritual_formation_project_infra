@@ -15,11 +15,15 @@ module "static_admin_staging" {
   env     = var.env
   region  = var.region
 
+  log_bucket_name = module.logging.log_bucket_name
+
   bucket_name         = var.metadata_bucket
   origin_path         = ""
-  domain_name         = "static.staging.${var.root_domain_name}" # TODO check this to see why static not pulling in apprunner
+  domain_name         = "static.staging.${var.root_domain_name}"
   hosted_zone_name    = var.root_domain_name
   acm_certificate_arn = module.route53_acm_static_staging.certificate_arn
+
+  response_headers_policy_id = module.cf_policies.security_headers_policy_id
 
   price_class = "PriceClass_100"
   default_ttl = 86400

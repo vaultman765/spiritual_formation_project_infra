@@ -95,6 +95,40 @@ resource "aws_s3_bucket_policy" "metadata_policy" {
   })
 }
 
+# Enable server access logging for the metadata bucket (only if a log bucket is provided)
+resource "aws_s3_bucket_logging" "metadata" {
+  count = var.log_bucket_name == null ? 0 : 1
+
+  bucket        = aws_s3_bucket.metadata.id
+  target_bucket = var.log_bucket_name
+  target_prefix = "s3/metadata/"
+}
+
+# Basic lifecycle: expire non-current object versions after 15 days
+resource "aws_s3_bucket_lifecycle_configuration" "metadata" {
+  bucket = aws_s3_bucket.metadata.id
+
+  rule {
+    id     = "expire-noncurrent-15d"
+    status = "Enabled"
+    filter {}
+
+    noncurrent_version_expiration {
+      noncurrent_days = 15
+    }
+  }
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
+}
+
 
 # ---------- FRONTEND (DISABLED by default; cloudfront_site owns it) ----------
 resource "aws_s3_bucket" "frontend" {
@@ -172,4 +206,37 @@ resource "aws_s3_bucket_policy" "frontend_policy" {
       }
     ]
   })
+}
+
+# Frontend: access logging (only when bucket is created and log bucket provided)
+resource "aws_s3_bucket_logging" "frontend" {
+  count = (var.create_frontend_bucket && var.log_bucket_name != null) ? 1 : 0
+
+  bucket        = aws_s3_bucket.frontend[0].id
+  target_bucket = var.log_bucket_name
+  target_prefix = "s3/frontend/"
+}
+
+# Frontend: lifecycle (only when bucket is created)
+resource "aws_s3_bucket_lifecycle_configuration" "frontend" {
+  count  = var.create_frontend_bucket ? 1 : 0
+  bucket = aws_s3_bucket.frontend[0].id
+
+  rule {
+    id     = "expire-noncurrent-15d"
+    status = "Enabled"
+    filter {}
+
+    noncurrent_version_expiration { noncurrent_days = 15 }
+  }
+
+  rule {
+    id     = "abort-incomplete-multipart-uploads"
+    status = "Enabled"
+    filter {}
+
+    abort_incomplete_multipart_upload {
+      days_after_initiation = 7
+    }
+  }
 }
