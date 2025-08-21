@@ -13,6 +13,7 @@ data "aws_route53_zone" "root" {
 #      - certificate_validation_records: CNAMEs you must publish
 #      - dns_target: the final CNAME target for your API hostname
 resource "aws_apprunner_custom_domain_association" "api_staging" {
+  count       = var.staging_infra_enabled ? 1 : 0
   domain_name = var.api_domain_name
   service_arn = module.apprunner.service_arn
 }
@@ -24,14 +25,14 @@ resource "aws_apprunner_custom_domain_association" "api_staging" {
 # Solution: run `terraform apply -target=aws_apprunner_custom_domain_association.api_staging`
 # then run `terraform apply` again.
 resource "aws_route53_record" "apprunner_validation" {
-  for_each = {
-    for rec in aws_apprunner_custom_domain_association.api_staging.certificate_validation_records :
+  for_each = var.staging_infra_enabled ? {
+    for rec in aws_apprunner_custom_domain_association.api_staging[0].certificate_validation_records :
     rec.name => {
       name  = rec.name
       type  = rec.type
       value = rec.value
     }
-  }
+  } : {}
 
   zone_id = data.aws_route53_zone.root.zone_id
   name    = each.value.name
@@ -42,9 +43,10 @@ resource "aws_route53_record" "apprunner_validation" {
 
 # 4) Publish the final CNAME so clients resolve your API hostname to App Runner
 resource "aws_route53_record" "apprunner_api_cname" {
+  count   = var.staging_infra_enabled ? 1 : 0
   zone_id = data.aws_route53_zone.root.zone_id
   name    = var.api_domain_name
   type    = "CNAME"
   ttl     = 60
-  records = [aws_apprunner_custom_domain_association.api_staging.dns_target]
+  records = [aws_apprunner_custom_domain_association.api_staging[0].dns_target]
 }

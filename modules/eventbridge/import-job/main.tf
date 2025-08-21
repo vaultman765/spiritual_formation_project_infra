@@ -38,39 +38,50 @@ resource "aws_iam_role" "events_to_ecs" {
 
 # Permissions: RunTask + PassRole (execution + task roles)
 data "aws_iam_policy_document" "events_to_ecs" {
-  statement {
-    sid       = "RunTask"
-    actions   = ["ecs:RunTask"]
-    resources = [var.task_definition_arn]
+  dynamic "statement" {
+    for_each = var.task_definition_arn != null ? [var.task_definition_arn] : []
+    content {
+      sid       = "RunTask"
+      actions   = ["ecs:RunTask"]
+      resources = [statement.value]
+    }
   }
-  statement {
-    sid     = "PassRoles"
-    actions = ["iam:PassRole"]
-    resources = [
-      var.task_role_arn,
-      var.task_execution_role_arn
-    ]
-    condition {
-      test     = "StringEquals"
-      variable = "iam:PassedToService"
-      values   = ["ecs-tasks.amazonaws.com"]
+
+  dynamic "statement" {
+    for_each = length(compact([var.task_role_arn, var.task_execution_role_arn])) > 0 ? [1] : []
+    content {
+      sid     = "PassRoles"
+      actions = ["iam:PassRole"]
+      resources = compact([
+        var.task_role_arn,
+        var.task_execution_role_arn
+      ])
+      condition {
+        test     = "StringEquals"
+        variable = "iam:PassedToService"
+        values   = ["ecs-tasks.amazonaws.com"]
+      }
     }
   }
 }
 
 resource "aws_iam_policy" "events_to_ecs" {
-  name   = "${var.project}-${var.env}-events-to-ecs"
+  count  = (var.task_definition_arn != null || length(compact([var.task_role_arn, var.task_execution_role_arn])) > 0) ? 1 : 0
+  name   = "${var.name_prefix}-events-to-ecs"
   policy = data.aws_iam_policy_document.events_to_ecs.json
   tags   = var.tags
 }
 
 resource "aws_iam_role_policy_attachment" "events_to_ecs_attach" {
+  count      = length(aws_iam_policy.events_to_ecs) > 0 ? 1 : 0
   role       = aws_iam_role.events_to_ecs.name
-  policy_arn = aws_iam_policy.events_to_ecs.arn
+  policy_arn = aws_iam_policy.events_to_ecs[0].arn
 }
 
 # Target: run Fargate task in private subnets, no public IP (matches your current config)
 resource "aws_cloudwatch_event_target" "run_import_task" {
+  count = var.cluster_arn != null && var.task_definition_arn != null ? 1 : 0
+
   rule     = aws_cloudwatch_event_rule.s3_metadata_object_created.name
   arn      = var.cluster_arn
   role_arn = aws_iam_role.events_to_ecs.arn

@@ -81,8 +81,8 @@ output "eventbridge_role_arn" {
   value       = module.eventbridge_import.role_arn
   description = "IAM role EventBridge assumes to run the ECS task."
 }
-output "vpc_endpoints_sg_id" { value = module.vpc_endpoints.sg_id }
-output "vpce_secretsmanager_id" { value = module.vpc_endpoints.secretsmanager_endpoint_id }
-output "vpce_ecr_api_id" { value = module.vpc_endpoints.ecr_api_endpoint_id }
-output "vpce_ecr_dkr_id" { value = module.vpc_endpoints.ecr_dkr_endpoint_id }
-output "vpce_logs_id" { value = module.vpc_endpoints.logs_endpoint_id }
+output "vpc_endpoints_sg_id"         { value = var.staging_infra_enabled ? module.vpc_endpoints[0].sg_id : null }
+output "vpce_secretsmanager_id"      { value = var.staging_infra_enabled ? module.vpc_endpoints[0].secretsmanager_endpoint_id : null }
+output "vpce_ecr_api_id"             { value = var.staging_infra_enabled ? module.vpc_endpoints[0].ecr_api_endpoint_id : null }
+output "vpce_ecr_dkr_id"             { value = var.staging_infra_enabled ? module.vpc_endpoints[0].ecr_dkr_endpoint_id : null }
+output "vpce_logs_id"                { value = var.staging_infra_enabled ? module.vpc_endpoints[0].logs_endpoint_id : null }

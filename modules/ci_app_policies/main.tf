@@ -3,8 +3,12 @@ terraform {
 }
 
 locals {
-  exec_role_name = var.execution_role_name != "" ? var.execution_role_name : element(reverse(split("/", var.execution_role_arn)), 0)
-  task_role_name = var.task_role_name != "" ? var.task_role_name : element(reverse(split("/", var.task_role_arn)), 0)
+  exec_role_name = var.execution_role_name != "" ? var.execution_role_name : (
+    var.execution_role_arn != null ? element(reverse(split("/", var.execution_role_arn)), 0) : ""
+  )
+  task_role_name = var.task_role_name != "" ? var.task_role_name : (
+    var.task_role_arn != null ? element(reverse(split("/", var.task_role_arn)), 0) : ""
+  )
 }
 
 # ---------- Metadata Sync (S3; no CloudFront, to preserve current behavior) ----------
@@ -116,6 +120,7 @@ resource "aws_iam_policy" "exec_read_secrets" {
 }
 
 resource "aws_iam_role_policy_attachment" "exec_read_secrets_attach" {
+  count      = local.exec_role_name != "" ? 1 : 0
   role       = local.exec_role_name
   policy_arn = aws_iam_policy.exec_read_secrets.arn
 }
@@ -143,6 +148,7 @@ resource "aws_iam_policy" "task_read_secrets" {
 }
 
 resource "aws_iam_role_policy_attachment" "task_read_secrets_attach" {
+  count      = local.task_role_name != "" ? 1 : 0
   role       = local.task_role_name
   policy_arn = aws_iam_policy.task_read_secrets.arn
 }

@@ -58,8 +58,8 @@ module "ci_app_policies" {
   apprunner_service_arn = var.apprunner_service_arn # "" keeps current behavior
 
   # Execution/task roles from your ECS import module (or wherever those roles are created)
-  execution_role_arn = module.ecs_import.execution_role_arn
-  task_role_arn      = module.ecs_import.task_role_arn
+  execution_role_arn = var.staging_infra_enabled ? module.ecs_import[0].execution_role_arn : null
+  task_role_arn      = var.staging_infra_enabled ? module.ecs_import[0].task_role_arn : null
 
   # Secrets (RDS + Django)
   secret_arns = [

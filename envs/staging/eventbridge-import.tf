@@ -5,6 +5,8 @@ locals {
 module "ecs_import" {
   source = "../../modules/ecs_import_job"
 
+  count  = var.staging_infra_enabled ? 1 : 0
+
   project            = var.project
   env                = var.env
   name_prefix        = var.name_prefix
@@ -29,10 +31,10 @@ module "eventbridge_import" {
   metadata_bucket = module.s3.metadata_bucket_name
 
   # From ecs_import module outputs
-  cluster_arn             = module.ecs_import.cluster_arn
-  task_definition_arn     = module.ecs_import.task_definition_arn
-  task_role_arn           = module.ecs_import.task_role_arn
-  task_execution_role_arn = module.ecs_import.execution_role_arn
+  cluster_arn             = var.staging_infra_enabled ? module.ecs_import[0].cluster_arn : null
+  task_definition_arn     = var.staging_infra_enabled ? module.ecs_import[0].task_definition_arn : null
+  task_role_arn           = var.staging_infra_enabled ? module.ecs_import[0].task_role_arn : null
+  task_execution_role_arn = var.staging_infra_enabled ? module.ecs_import[0].execution_role_arn : null
 
   private_subnet_ids = module.vpc.private_subnet_ids
   security_group_id  = aws_security_group.ecs_tasks.id
