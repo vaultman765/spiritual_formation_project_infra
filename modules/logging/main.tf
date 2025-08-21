@@ -1,14 +1,23 @@
+data "aws_caller_identity" "this" {}
+data "aws_region" "this" {}
+
+locals {
+  derived_bucket_name = "${var.name_prefix}-${data.aws_region.this.name}-${data.aws_caller_identity.this.account_id}-logs"
+  bucket_name         = var.bucket_name != "" ? var.bucket_name : local.derived_bucket_name
+}
+
 resource "aws_s3_bucket" "logs" {
-  bucket        = "${var.name_prefix}-logs"
+  bucket        = local.bucket_name
   force_destroy = false
   tags          = var.tags
 }
 
 resource "aws_s3_bucket_ownership_controls" "logs" {
   bucket = aws_s3_bucket.logs.id
+  # For access logging targets, prefer BucketOwnerPreferred so ACLs from AWS services are accepted
   rule {
-    object_ownership = "ObjectWriter"
-  }
+    object_ownership = "BucketOwnerPreferred"
+    }
 }
 
 resource "aws_s3_bucket_notification" "logs" {
