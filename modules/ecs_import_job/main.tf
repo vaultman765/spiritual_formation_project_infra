@@ -1,6 +1,7 @@
 locals {
-  name = "${var.name_prefix}-import"
-  tags = { Project = var.project, Env = var.env, Managed = "Terraform", Role = "ImportJob" }
+  name        = "${var.name_prefix}-import"
+  secret_arns = compact([var.rds_secret_arn, var.django_secret_arn])
+  tags        = { Project = var.project, Env = var.env, Managed = "Terraform", Role = "ImportJob" }
 }
 
 # ECS cluster
@@ -153,3 +154,40 @@ resource "aws_ecs_task_definition" "this" {
 }
 
 data "aws_caller_identity" "me" {}
+
+# Extra permissions for the EXECUTION role to fetch env secrets
+data "aws_iam_policy_document" "execution_extra" {
+  count = length(local.secret_arns) > 0 ? 1 : 0
+
+  statement {
+    sid       = "SecretsRead"
+    actions   = ["secretsmanager:GetSecretValue", "secretsmanager:DescribeSecret"]
+    resources = local.secret_arns
+  }
+
+  # If your secrets use the default AWS-managed KMS key, this still works.
+  # If you later move to a CMK with a strict key policy, grant this role on the key as well.
+  statement {
+    sid       = "KMSDecryptViaSM"
+    actions   = ["kms:Decrypt"]
+    resources = ["*"]
+    condition {
+      test     = "StringEquals"
+      variable = "kms:ViaService"
+      values   = ["secretsmanager.${var.aws_region}.amazonaws.com"]
+    }
+  }
+}
+
+resource "aws_iam_policy" "execution_extra" {
+  count  = length(local.secret_arns) > 0 ? 1 : 0
+  name   = "${local.name}-execution-secrets"
+  policy = data.aws_iam_policy_document.execution_extra[0].json
+  tags   = local.tags
+}
+
+resource "aws_iam_role_policy_attachment" "execution_extra_attach" {
+  count      = length(local.secret_arns) > 0 ? 1 : 0
+  role       = aws_iam_role.execution.name
+  policy_arn = aws_iam_policy.execution_extra[0].arn
+}

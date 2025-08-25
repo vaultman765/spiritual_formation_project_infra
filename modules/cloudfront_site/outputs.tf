@@ -16,6 +16,11 @@ output "distribution_id" {
   description = "CloudFront distribution ID."
 }
 
+output "distribution_arn" {
+  value       = aws_cloudfront_distribution.this.arn
+  description = "CloudFront distribution ARN."
+}
+
 output "distribution_domain" {
   value       = aws_cloudfront_distribution.this.domain_name
   description = "CloudFront domain (useful before DNS propagates)."

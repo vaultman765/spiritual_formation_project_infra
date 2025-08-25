@@ -129,3 +129,16 @@ variable "rds_log_retention_days" {
   type    = number
   default = 365
 }
+
+# Enhanced Monitoring
+variable "monitoring_interval" {
+  type    = number
+  default = 0 # 0 = disabled; 1,5,10,15,30,60 seconds if enabled
+}
+
+variable "monitoring_role_arn" {
+  type      = string
+  default   = ""
+  nullable  = true
+  sensitive = false
+}

@@ -17,3 +17,7 @@ output "alias_record_fqdn" {
   value       = aws_route53_record.alias.fqdn
   description = "Route53 A/ALIAS record FQDN."
 }
+output "distribution_arn" {
+  value       = aws_cloudfront_distribution.static.arn
+  description = "CloudFront distribution ARN."
+}

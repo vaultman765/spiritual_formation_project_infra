@@ -108,7 +108,7 @@ resource "aws_cloudfront_function" "redirect" {
 resource "aws_cloudfront_distribution" "this" {
   provider = aws.us_east_1
   # checkov:skip=CKV_AWS_305 reason="Redirect-only distribution; default root object not applicable"
-  # (We’ll consider WAF/geo/origin-failover later or skip them intentionally.)
+  # TODO (We’ll consider WAF/geo/origin-failover later or skip them intentionally.)
 
   enabled             = true
   is_ipv6_enabled     = true

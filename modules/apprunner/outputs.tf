@@ -19,3 +19,7 @@ output "service_status" {
   value       = var.enabled ? aws_apprunner_service.this[0].status : null
   description = "Service status."
 }
+output "vpc_connector_arn" {
+  value       = var.enabled ? aws_apprunner_vpc_connector.this[0].arn : null
+  description = "ARN of the App Runner VPC connector."
+}

@@ -26,6 +26,10 @@ variable "vpn_enabled" {
 }
 
 # --- Project/Environment Metadata ---
+variable "aws_acct_num" {
+  type        = string
+  description = "AWS account number."
+}
 variable "env" {
   type        = string
   description = "Deployment environment (e.g., staging, prod)."
@@ -71,10 +75,6 @@ variable "public_subnet_cidrs" {
 }
 
 # --- GitHub/OIDC ---
-variable "aws_acct_num" {
-  type        = string
-  description = "AWS account number."
-}
 variable "github_owner" {
   type        = string
   description = "GitHub organization/owner."

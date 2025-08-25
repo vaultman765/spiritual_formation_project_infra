@@ -73,3 +73,8 @@ variable "log_bucket_name" {
   type    = string
   default = null
 }
+variable "web_acl_arn" {
+  type    = string
+  default = null
+  description = "Optional WAFv2 Web ACL ARN to attach to this distribution"
+}

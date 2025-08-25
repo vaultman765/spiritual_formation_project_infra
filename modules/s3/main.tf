@@ -80,13 +80,14 @@ resource "aws_s3_bucket_policy" "metadata_policy" {
         Action = ["s3:GetObject"]
         Resource = [
           # Restrict to the prefixes CloudFront actually serves (tighten if you like)
+          "${aws_s3_bucket.metadata.arn}/*",
           "${aws_s3_bucket.metadata.arn}/django/static/*",
           "${aws_s3_bucket.metadata.arn}/django/media/*",
           "${aws_s3_bucket.metadata.arn}/images/*",
           "${aws_s3_bucket.metadata.arn}/docs/*"
         ]
         Condition = {
-          StringEquals = {
+          StringLike = {
             "AWS:SourceArn" = "arn:aws:cloudfront::${var.aws_acct_num}:distribution/${var.static_admin_distribution_id}"
           }
         }

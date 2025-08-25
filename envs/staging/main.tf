@@ -41,6 +41,7 @@ module "vpc" {
 
 module "vpc_endpoints" {
   source = "../../modules/vpc/endpoints"
+  count  = var.staging_infra_enabled ? 1 : 0
 
   # identity / naming
   project     = var.project
