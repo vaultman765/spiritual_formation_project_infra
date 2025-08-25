@@ -6,24 +6,33 @@ resource "aws_security_group" "apprunner_connector" {
   tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
 }
 
-# ECS tasks -> endpoints, DB, etc.
-resource "aws_security_group" "ecs_tasks" {
-  name        = "${var.name_prefix}-ecs-tasks-sg"
-  description = "ECS task traffic"
-  vpc_id      = module.vpc.vpc_id
-  tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
-}
-
+# TODO tighten - or pontentially don't need?
 # Egress-any is fine for now (we can tighten later / or rely on endpoints)
 resource "aws_vpc_security_group_egress_rule" "apprunner_all_egress" {
   security_group_id = aws_security_group.apprunner_connector.id
   ip_protocol       = "-1"
   cidr_ipv4         = "0.0.0.0/0"
-  description       = "Allow all egress (can tighten later)" # TODO tighten
+  description       = "Allow all egress (can tighten later)"
 }
-resource "aws_vpc_security_group_egress_rule" "ecs_all_egress" {
+
+# Shared SG for ECS tasks (egress-only; EventBridge target will attach this)
+resource "aws_security_group" "ecs_tasks" {
+  name        = "${var.name_prefix}-ecs-tasks-sg"
+  description = "Managed by Terraform"
+  vpc_id      = module.vpc.vpc_id
+  tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
+
+  # Safety: avoid accidental destroy
+  lifecycle { prevent_destroy = true }
+}
+
+# TODO tighten
+resource "aws_security_group_rule" "ecs_tasks_egress_all" {
+  type              = "egress"
   security_group_id = aws_security_group.ecs_tasks.id
-  ip_protocol       = "-1"
-  cidr_ipv4         = "0.0.0.0/0"
-  description       = "Allow all egress (can tighten later)" # TODO tighten
+  from_port         = 0
+  to_port           = 0
+  protocol          = "-1"
+  cidr_blocks       = ["0.0.0.0/0"]
+  description       = "Allow outbound to VPC endpoints & S3"
 }

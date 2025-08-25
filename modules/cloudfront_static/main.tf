@@ -32,6 +32,8 @@ resource "aws_cloudfront_distribution" "static" {
 
   aliases = [var.domain_name]
 
+  web_acl_id = var.web_acl_arn
+
   origin {
     domain_name              = "${var.bucket_name}.s3.${var.region}.amazonaws.com"
     origin_id                = "s3-${var.bucket_name}"
@@ -64,7 +66,8 @@ resource "aws_cloudfront_distribution" "static" {
 
   restrictions {
     geo_restriction {
-      restriction_type = "none"
+      restriction_type = var.geo_restriction_type
+      locations        = var.geo_locations
     }
   }
 
@@ -74,7 +77,7 @@ resource "aws_cloudfront_distribution" "static" {
     minimum_protocol_version = "TLSv1.2_2021"
   }
 
-  default_root_object = "" # static only; no index.html assumed
+  default_root_object = ""
 
   logging_config {
     bucket          = var.log_bucket_name == null ? null : "${var.log_bucket_name}.s3.amazonaws.com"

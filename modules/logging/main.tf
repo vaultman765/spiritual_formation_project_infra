@@ -17,7 +17,7 @@ resource "aws_s3_bucket_ownership_controls" "logs" {
   # For access logging targets, prefer BucketOwnerPreferred so ACLs from AWS services are accepted
   rule {
     object_ownership = "BucketOwnerPreferred"
-    }
+  }
 }
 
 resource "aws_s3_bucket_notification" "logs" {

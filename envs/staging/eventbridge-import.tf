@@ -5,7 +5,7 @@ locals {
 module "ecs_import" {
   source = "../../modules/ecs_import_job"
 
-  count  = var.staging_infra_enabled ? 1 : 0
+  count = var.staging_infra_enabled ? 1 : 0
 
   project            = var.project
   env                = var.env

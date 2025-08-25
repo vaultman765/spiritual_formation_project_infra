@@ -171,6 +171,10 @@ resource "aws_db_instance" "this" {
   # (Optional but useful)
   performance_insights_enabled = false # prod can override to true later
 
+  # Enhanced Monitoring
+  monitoring_interval = var.monitoring_interval
+  monitoring_role_arn = var.monitoring_interval > 0 ? var.monitoring_role_arn : null
+
 
 
   tags = local.tags

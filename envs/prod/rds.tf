@@ -14,7 +14,7 @@ module "rds" {
   vpc_id             = module.vpc.vpc_id
   private_subnet_ids = module.vpc.private_subnet_ids
 
-  allowed_sg_ids     = local.allowed_sg_ids
+  allowed_sg_ids = local.allowed_sg_ids
 
   # No direct admin IPs in prod (VPN only if later)
   admin_cidr_blocks = []
@@ -28,7 +28,10 @@ module "rds" {
   max_allocated_storage_gb = var.max_allocated_storage_gb
   multi_az                 = var.multi_az
 
-  enabled                = true
-  identifier             = var.identifier
-  final_snapshot_prefix  = "${var.name_prefix}-final"
+  monitoring_interval = 15
+  monitoring_role_arn = aws_iam_role.rds_em.arn
+
+  enabled               = true
+  identifier            = var.identifier
+  final_snapshot_prefix = "${var.name_prefix}-final"
 }

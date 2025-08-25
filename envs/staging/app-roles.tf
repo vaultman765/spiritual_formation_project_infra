@@ -42,6 +42,7 @@ data "aws_ecr_repository" "backend" {
 module "ci_app_policies" {
   source = "../../modules/ci_app_policies"
 
+  project     = var.project
   env         = var.env
   region      = var.region
   name_prefix = var.name_prefix

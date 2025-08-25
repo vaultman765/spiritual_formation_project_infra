@@ -28,7 +28,7 @@ resource "aws_security_group" "apprunner" {
 
 # Allow App Runner → Postgres (ingress on the RDS SG, source = this SG)
 resource "aws_vpc_security_group_ingress_rule" "rds_from_apprunner" {
-  count                      = var.rds_sg_id != null ? 1 : 0
+  count                        = var.rds_sg_id != null ? 1 : 0
   description                  = "Allow Postgres from App Runner VPC connector"
   security_group_id            = var.rds_sg_id
   ip_protocol                  = "tcp"
@@ -40,7 +40,7 @@ resource "aws_vpc_security_group_ingress_rule" "rds_from_apprunner" {
 # VPC Connector
 resource "aws_apprunner_vpc_connector" "this" {
   count              = var.enabled ? 1 : 0
-  vpc_connector_name  = "${var.name_prefix}-apprunner-vpc"
+  vpc_connector_name = "${var.name_prefix}-apprunner-vpc"
   subnets            = var.private_subnet_ids
   security_groups    = [aws_security_group.apprunner.id]
   tags               = local.tags

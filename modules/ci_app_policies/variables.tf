@@ -1,3 +1,4 @@
+variable "project" { type = string }
 variable "env" { type = string }
 variable "region" { type = string }
 variable "name_prefix" { type = string }
@@ -41,6 +42,7 @@ variable "task_role_arn" {
 
 # Allow multiple secrets (RDS + Django), not just one
 variable "secret_arns" {
-  description = "Secrets the app/execution may read (e.g., RDS + Django)."
   type        = list(string)
+  description = "Secrets Manager ARNs that CI needs to read (can be empty)"
+  default     = []
 }

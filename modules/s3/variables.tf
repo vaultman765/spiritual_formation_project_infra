@@ -38,4 +38,3 @@ variable "log_bucket_name" {
   type    = string
   default = null
 }
-

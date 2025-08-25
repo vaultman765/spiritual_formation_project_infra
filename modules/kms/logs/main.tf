@@ -2,21 +2,21 @@ data "aws_caller_identity" "this" {}
 data "aws_region" "this" {}
 locals {
   account_id = data.aws_caller_identity.this.account_id
-  region = data.aws_region.this.name
+  region     = data.aws_region.this.name
   # Allow CW Logs to use the key for any log group in this account/region.
   # If you prefer to scope to a single LG later, we can tighten:
   #   arn:aws:logs:${local.region}:${local.account_id}:log-group:/aws/vpc/${var.name_prefix}/flow-logs
   cwlogs_context_arn = "arn:aws:logs:${local.region}:${local.account_id}:*"
-  
+
   admin_statement = length(var.admin_principal_arns) > 0 ? [
     {
-      Sid      = "AllowKeyAdmins"
-      Effect   = "Allow"
+      Sid       = "AllowKeyAdmins"
+      Effect    = "Allow"
       Principal = { AWS = var.admin_principal_arns }
-      Action   = [
-        "kms:Create*","kms:Describe*","kms:Enable*","kms:List*","kms:Put*",
-        "kms:Update*","kms:Revoke*","kms:Disable*","kms:Get*","kms:Delete*",
-        "kms:TagResource","kms:UntagResource","kms:ScheduleKeyDeletion","kms:CancelKeyDeletion"
+      Action = [
+        "kms:Create*", "kms:Describe*", "kms:Enable*", "kms:List*", "kms:Put*",
+        "kms:Update*", "kms:Revoke*", "kms:Disable*", "kms:Get*", "kms:Delete*",
+        "kms:TagResource", "kms:UntagResource", "kms:ScheduleKeyDeletion", "kms:CancelKeyDeletion"
       ]
       Resource = "*"
     }
@@ -24,21 +24,21 @@ locals {
 
   base_statements = [
     {
-      Sid      = "AllowRootAccount"
-      Effect   = "Allow"
+      Sid       = "AllowRootAccount"
+      Effect    = "Allow"
       Principal = { AWS = "arn:aws:iam::${local.account_id}:root" }
-      Action   = "kms:*"
-      Resource = "*"
+      Action    = "kms:*"
+      Resource  = "*"
     },
     {
-      Sid    = "AllowCloudWatchLogsUse"
-      Effect = "Allow"
+      Sid       = "AllowCloudWatchLogsUse"
+      Effect    = "Allow"
       Principal = { Service = "logs.${local.region}.amazonaws.com" }
       Action = [
-        "kms:Encrypt","kms:Decrypt","kms:ReEncrypt*",
-        "kms:GenerateDataKey*","kms:DescribeKey"
+        "kms:Encrypt", "kms:Decrypt", "kms:ReEncrypt*",
+        "kms:GenerateDataKey*", "kms:DescribeKey"
       ]
-      Resource  = "*"
+      Resource = "*"
       Condition = {
         ArnEquals = { "kms:EncryptionContext:aws:logs:arn" = local.cwlogs_context_arn }
       }

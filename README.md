@@ -1,3 +1,7 @@
+# README
+
+## Useful Commands
+
 ### Creating a Django SuperUser
 
 ``` bash
@@ -76,4 +80,11 @@ aws s3 rm s3://sf-staging-logs --recursive
 terraform init
 terraform plan
 terraform apply
+```
+
+### Create invalidations
+
+```bash
+aws cloudfront create-invalidation --distribution-id <YOUR_DISTRIBUTION_ID> --paths "/*"
+aws cloudfront get-invalidation --distribution-id <YOUR_DISTRIBUTION_ID> --id <INVALIDATION_ID>
 ```

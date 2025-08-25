@@ -1,11 +1,11 @@
 data "aws_caller_identity" "current" {}
 
 module "kms_logs" {
-  source      = "../../modules/kms/logs"
-  name_prefix = var.name_prefix
-  region = var.region
+  source       = "../../modules/kms/logs"
+  name_prefix  = var.name_prefix
+  region       = var.region
   aws_acct_num = var.aws_acct_num
-  tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
+  tags         = { Project = var.project, Env = var.env, Managed = "Terraform" }
 }
 
 module "vpc" {
@@ -27,10 +27,10 @@ module "vpc" {
 module "vpc_endpoints" {
   source = "../../modules/vpc/endpoints"
 
-  project      = var.project
-  env          = var.env
-  name_prefix  = var.name_prefix
-  region       = var.region
+  project     = var.project
+  env         = var.env
+  name_prefix = var.name_prefix
+  region      = var.region
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnet_ids
@@ -40,6 +40,7 @@ module "vpc_endpoints" {
   allowed_sg_ids = {
     ecs_tasks           = aws_security_group.ecs_tasks.id
     apprunner_connector = aws_security_group.apprunner_connector.id
+    sm_rotation         = aws_security_group.sm_rotation.id
   }
 
   # Turn on the endpoints we need for private egress
@@ -57,4 +58,32 @@ module "logging" {
   tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
 
   bucket_name = "${var.name_prefix}-${var.region}-${data.aws_caller_identity.current.account_id}-logs"
+}
+
+data "aws_iam_policy_document" "assume_role" {
+  statement {
+    actions = ["sts:AssumeRoleWithWebIdentity"]
+    principals {
+      type        = "Federated"
+      identifiers = [data.terraform_remote_state.staging.outputs.github_oidc_provider_arn]
+    }
+
+    condition {
+      test     = "StringEquals"
+      variable = "token.actions.githubusercontent.com:aud"
+      values   = ["sts.amazonaws.com"]
+    }
+
+    # Match the exact list of refs (e.g., refs/heads/main)
+    condition {
+      test     = "StringLike"
+      variable = "token.actions.githubusercontent.com:sub"
+      values   = [for r in var.github_refs : "repo:${var.github_owner}/${var.github_repo}:${r}"]
+    }
+  }
+}
+
+module "cf_policies" {
+  source      = "../../modules/cloudfront_policies"
+  name_prefix = var.name_prefix
 }
