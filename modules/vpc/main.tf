@@ -27,6 +27,13 @@ resource "aws_vpc" "this" {
   })
 }
 
+resource "aws_default_security_group" "default" {
+  count  = local.create_vpc ? 1 : 0
+  vpc_id = aws_vpc.this[0].id
+  # no ingress/egress blocks = deny all
+  tags = { Name = "${var.name_prefix}-default-sg" }
+}
+
 resource "aws_internet_gateway" "this" {
   count  = local.create_vpc ? 1 : 0
   vpc_id = aws_vpc.this[0].id

@@ -72,6 +72,7 @@ data "aws_iam_policy_document" "apprunner_ci_prod" {
     actions   = ["apprunner:StartDeployment", "apprunner:UpdateService", "apprunner:DescribeService"]
     resources = [module.apprunner.service_arn]
   }
+  # checkov:skip=CKV_AWS_356: List operations require resource "*" as they operate at account level
   statement {
     sid       = "AppRunnerReadList"
     effect    = "Allow"

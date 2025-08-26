@@ -28,5 +28,8 @@ variable "memory" {
 }
 variable "log_retention_days" {
   type    = number
-  default = 7
+  default = 400
+}
+variable "log_kms_key_arn" {
+  type = string
 }

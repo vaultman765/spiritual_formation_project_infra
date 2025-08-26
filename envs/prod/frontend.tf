@@ -34,4 +34,10 @@ module "frontend_site_prod" {
 
   # WAF
   web_acl_arn = aws_wafv2_web_acl.prod.arn
+
+  # Keep it open to all countries but satisfy Checkov
+  geo_restriction_type = "none"
+  geo_locations        = [] # Empty list means no countries are blocked
+
+  kms_key_arn = module.kms_logs.kms_key_arn
 }

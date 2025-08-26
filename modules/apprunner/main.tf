@@ -9,6 +9,7 @@ data "aws_caller_identity" "this" {}
 resource "aws_cloudwatch_log_group" "this" {
   name              = "/aws/apprunner/${var.name_prefix}"
   retention_in_days = var.log_retention_days
+  kms_key_id        = var.log_kms_key_arn
   tags              = local.tags
 }
 
@@ -18,6 +19,7 @@ resource "aws_security_group" "apprunner" {
   description = "App Runner VPC egress"
   vpc_id      = var.vpc_id
   egress {
+    description = "App Runner will use via the VPC connector (egress-only)"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -115,6 +117,15 @@ data "aws_iam_policy_document" "instance" {
       "s3:ListMultipartUploadParts"
     ]
     resources = ["arn:aws:s3:::${var.s3_bucket_name}/*"]
+  }
+  statement {
+    sid = "KMSForS3"
+    actions = [
+      "kms:GenerateDataKey",
+      "kms:Decrypt",
+      "kms:DescribeKey"
+    ]
+    resources = [var.log_kms_key_arn]
   }
 }
 

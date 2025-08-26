@@ -17,3 +17,7 @@ variable "policy_extra_json" {
   type    = list(object({ Sid = string, Effect = string, Action = list(string), Resource = list(string) }))
   default = []
 }
+variable "kms_key_arn" {
+  type        = string
+  description = "KMS key ARN used for bucket encryption"
+}

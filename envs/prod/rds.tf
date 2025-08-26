@@ -34,4 +34,7 @@ module "rds" {
   enabled               = true
   identifier            = var.identifier
   final_snapshot_prefix = "${var.name_prefix}-final"
+
+  log_retention_days = var.log_retention_days
+  kms_key_arn        = module.kms_logs.kms_key_arn
 }

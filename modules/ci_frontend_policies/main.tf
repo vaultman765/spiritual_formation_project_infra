@@ -71,6 +71,19 @@ data "aws_iam_policy_document" "combined" {
       resources = statement.value.Resource
     }
   }
+  dynamic "statement" {
+    for_each = var.kms_key_arn != null ? [1] : []
+    content {
+      sid       = "KMSS3Encryption"
+      effect    = "Allow"
+      actions   = [
+        "kms:GenerateDataKey",
+        "kms:Decrypt",
+        "kms:DescribeKey"
+      ]
+      resources = [var.kms_key_arn]
+    }
+  }
 }
 
 resource "aws_iam_policy" "this" {

@@ -125,9 +125,9 @@ variable "rds_log_statement" {
 } # prod can tune if desired
 
 # CloudWatch retention for RDS log groups (days)
-variable "rds_log_retention_days" {
+variable "log_retention_days" {
   type    = number
-  default = 365
+  default = 400
 }
 
 # Enhanced Monitoring
@@ -141,4 +141,10 @@ variable "monitoring_role_arn" {
   default   = ""
   nullable  = true
   sensitive = false
+}
+
+variable "kms_key_arn" {
+  type        = string
+  description = "KMS key ARN for encrypting CloudWatch Logs"
+  default     = null
 }

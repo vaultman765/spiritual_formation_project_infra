@@ -28,8 +28,10 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "metadata" {
   bucket = aws_s3_bucket.metadata.id
   rule {
     apply_server_side_encryption_by_default {
-      sse_algorithm = "AES256"
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = var.kms_key_arn
     }
+    bucket_key_enabled = true
   }
 }
 
@@ -144,6 +146,12 @@ resource "aws_s3_bucket_ownership_controls" "frontend" {
   rule { object_ownership = "BucketOwnerEnforced" }
 }
 
+resource "aws_s3_bucket_notification" "frontend_events" {
+  count  = var.create_frontend_bucket ? 1 : 0
+  bucket = aws_s3_bucket.frontend[0].id
+  eventbridge = true
+}
+
 resource "aws_s3_bucket_versioning" "frontend" {
   count  = var.create_frontend_bucket ? 1 : 0
   bucket = aws_s3_bucket.frontend[0].id
@@ -154,7 +162,11 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "frontend" {
   count  = var.create_frontend_bucket ? 1 : 0
   bucket = aws_s3_bucket.frontend[0].id
   rule {
-    apply_server_side_encryption_by_default { sse_algorithm = "AES256" }
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = var.kms_key_arn
+    }
+    bucket_key_enabled = true
   }
 }
 

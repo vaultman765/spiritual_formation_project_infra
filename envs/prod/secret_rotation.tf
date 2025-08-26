@@ -1,10 +1,14 @@
 # Security group for rotation lambda -> DB
 resource "aws_security_group" "sm_rotation" {
+  # checkov:skip=CKV2_AWS_5
+  # Justification: This SG is attached to the SAR rotation Lambda via vpcSecurityGroupIds.
+  # The ENI is created inside the AWS-managed stack so Checkov can’t see the link.
   name        = "${var.name_prefix}-sm-rotation"
   description = "Secrets Manager rotation function egress within VPC"
   vpc_id      = module.vpc.vpc_id
 
   egress {
+    description = "Allow egress to VPC endpoints/NAT as required by Lambda runtime"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
@@ -16,7 +20,7 @@ resource "aws_security_group" "sm_rotation" {
 
 # Allow Secrets Manager rotation Lambda -> Postgres
 resource "aws_vpc_security_group_ingress_rule" "rds_from_rotation" {
-  security_group_id            = module.rds.rds_sg_id    # your DB SG
+  security_group_id            = module.rds.rds_sg_id # your DB SG
   ip_protocol                  = "tcp"
   from_port                    = 5432
   to_port                      = 5432
@@ -29,7 +33,7 @@ data "aws_iam_policy_document" "rot_trust" {
   statement {
     actions = ["sts:AssumeRole"]
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["lambda.amazonaws.com"]
     }
   }
@@ -48,9 +52,10 @@ resource "aws_iam_role_policy_attachment" "sm_rotation_basic" {
 # Allow Lambda to work with this secret (+ describe DB)
 data "aws_iam_policy_document" "sm_rotation_inline" {
   statement {
-    actions   = ["secretsmanager:GetSecretValue","secretsmanager:PutSecretValue","secretsmanager:DescribeSecret","secretsmanager:UpdateSecretVersionStage"]
+    actions   = ["secretsmanager:GetSecretValue", "secretsmanager:PutSecretValue", "secretsmanager:DescribeSecret", "secretsmanager:UpdateSecretVersionStage"]
     resources = [var.rds_secret_arn]
   }
+  # checkov:skip=CKV_AWS_356: rds:DescribeDBInstances is a service-level action that requires resource "*"
   statement {
     actions   = ["rds:DescribeDBInstances"]
     resources = ["*"]

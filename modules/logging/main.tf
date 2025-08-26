@@ -7,14 +7,20 @@ locals {
 }
 
 resource "aws_s3_bucket" "logs" {
+  # checkov:skip=CKV_AWS_18: Don't need logging for the logging bucket
   bucket        = local.bucket_name
   force_destroy = false
   tags          = var.tags
 }
 
-resource "aws_s3_bucket_ownership_controls" "logs" {
+resource "aws_s3_bucket_versioning" "logs" {
   bucket = aws_s3_bucket.logs.id
-  # For access logging targets, prefer BucketOwnerPreferred so ACLs from AWS services are accepted
+  versioning_configuration { status = "Enabled" }
+}
+
+resource "aws_s3_bucket_ownership_controls" "logs" {
+  # checkov:skip=CKV2_AWS_65: For access logging targets, prefer BucketOwnerPreferred so ACLs from AWS services are accepted
+  bucket = aws_s3_bucket.logs.id
   rule {
     object_ownership = "BucketOwnerPreferred"
   }
@@ -28,7 +34,11 @@ resource "aws_s3_bucket_notification" "logs" {
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
   bucket = aws_s3_bucket.logs.id
   rule {
-    apply_server_side_encryption_by_default { sse_algorithm = "AES256" }
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = var.kms_key_arn != null ? "aws:kms" : "AES256"
+      kms_master_key_id = var.kms_key_arn
+    }
+    bucket_key_enabled = true
   }
 }
 

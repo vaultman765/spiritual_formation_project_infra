@@ -58,7 +58,7 @@ data "aws_iam_policy_document" "lambda_policy" {
       "logs:CreateLogStream",
       "logs:PutLogEvents"
     ]
-    resources = ["*"]
+    resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:/aws/apprunner/${var.name_prefix}:*"]
   }
 
   statement {
@@ -66,6 +66,12 @@ data "aws_iam_policy_document" "lambda_policy" {
     effect    = "Allow"
     actions   = ["apprunner:StartDeployment", "apprunner:DescribeService", "apprunner:ListOperations"]
     resources = [module.apprunner.service_arn]
+  }
+  statement {
+    sid       = "SNSPublish"
+    effect    = "Allow"
+    actions   = ["sns:Publish"]
+    resources = [aws_sns_topic.lambda_dlq.arn]
   }
 }
 
@@ -88,20 +94,32 @@ data "archive_file" "apprunner_redeploy_zip" {
 }
 
 resource "aws_lambda_function" "apprunner_redeploy" {
-  count            = var.enable_secret_rotation_autodeploy ? 1 : 0
-  function_name    = local.lambda_name
-  role             = aws_iam_role.apprunner_redeploy[0].arn
-  handler          = "index.handler"
-  runtime          = "python3.12"
-  filename         = data.archive_file.apprunner_redeploy_zip.output_path
-  source_code_hash = data.archive_file.apprunner_redeploy_zip.output_base64sha256
-  timeout          = 30
+  # checkov:skip=CKV_AWS_117
+  # Justification: Lambda calls App Runner public API only; VPC adds cold starts and isn’t required.
+  count                          = var.enable_secret_rotation_autodeploy ? 1 : 0
+  function_name                  = local.lambda_name
+  role                           = aws_iam_role.apprunner_redeploy[0].arn
+  handler                        = "index.handler"
+  runtime                        = "python3.12"
+  filename                       = data.archive_file.apprunner_redeploy_zip.output_path
+  source_code_hash               = data.archive_file.apprunner_redeploy_zip.output_base64sha256
+  kms_key_arn                    = module.kms_logs.kms_key_arn
+  # reserved_concurrent_executions = 2
+  timeout                        = 30
   environment {
     variables = {
       APP_RUNNER_ARN = module.apprunner.service_arn
     }
   }
+  dead_letter_config {
+    target_arn = aws_sns_topic.lambda_dlq.arn
+  }
   tags = { Project = var.project, Env = var.env, Managed = "Terraform" }
+}
+
+resource "aws_sns_topic" "lambda_dlq" {
+  name              = "${var.name_prefix}-lambda-dlq"
+  kms_master_key_id = module.kms_logs.kms_key_arn
 }
 
 ############################################################
@@ -121,7 +139,7 @@ resource "aws_cloudwatch_event_rule" "secret_rotation" {
     ],
     "detail" : {
       "eventSource" : ["secretsmanager.amazonaws.com"],
-      "eventName"   : ["RotationSucceeded"],
+      "eventName" : ["RotationSucceeded"],
       "additionalEventData" : {
         "SecretId" : [var.rds_secret_arn]
       }

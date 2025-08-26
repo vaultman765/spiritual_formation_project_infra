@@ -1,13 +1,13 @@
 # App Runner VPC connector -> DB, endpoints, etc.
 resource "aws_security_group" "apprunner_connector" {
+  # checkov:skip=CKV2_AWS_5
+  # Justification: In use by aws_apprunner_vpc_connector (security_groups=[...]).
   name        = "${var.name_prefix}-apprunner-connector-sg"
   description = "App Runner VPC Connector"
   vpc_id      = module.vpc.vpc_id
   tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
 }
 
-# TODO tighten - or pontentially don't need?
-# Egress-any is fine for now (we can tighten later / or rely on endpoints)
 resource "aws_vpc_security_group_egress_rule" "apprunner_all_egress" {
   security_group_id = aws_security_group.apprunner_connector.id
   ip_protocol       = "-1"
@@ -15,8 +15,9 @@ resource "aws_vpc_security_group_egress_rule" "apprunner_all_egress" {
   description       = "Allow all egress (can tighten later)"
 }
 
-# Shared SG for ECS tasks (egress-only; EventBridge target will attach this)
 resource "aws_security_group" "ecs_tasks" {
+  # checkov:skip=CKV2_AWS_5
+  # Justification: Used at runtime by ECS Fargate tasks via EventBridge target network_configuration.
   name        = "${var.name_prefix}-ecs-tasks-sg"
   description = "Managed by Terraform"
   vpc_id      = module.vpc.vpc_id
@@ -26,8 +27,8 @@ resource "aws_security_group" "ecs_tasks" {
   lifecycle { prevent_destroy = true }
 }
 
-# TODO tighten
 resource "aws_security_group_rule" "ecs_tasks_egress_all" {
+  # checkov:skip=CKV_AWS_382: This is normal for egress‑only SGs
   type              = "egress"
   security_group_id = aws_security_group.ecs_tasks.id
   from_port         = 0

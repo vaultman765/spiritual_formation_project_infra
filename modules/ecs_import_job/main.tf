@@ -18,6 +18,7 @@ resource "aws_ecs_cluster" "this" {
 resource "aws_cloudwatch_log_group" "this" {
   name              = "/ecs/${local.name}"
   retention_in_days = var.log_retention_days
+  kms_key_id        = var.log_kms_key_arn
   tags              = local.tags
 }
 

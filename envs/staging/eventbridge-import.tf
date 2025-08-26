@@ -13,6 +13,8 @@ module "ecs_import" {
   private_subnet_ids = module.vpc.private_subnet_ids
   security_group_id  = aws_security_group.ecs_tasks.id
 
+  log_kms_key_arn = module.kms_logs.kms_key_arn
+
   container_image   = local.import_image
   aws_region        = var.region
   metadata_bucket   = module.s3.metadata_bucket_name
