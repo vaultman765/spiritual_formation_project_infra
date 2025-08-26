@@ -25,6 +25,8 @@ module "static_admin_staging" {
 
   response_headers_policy_id = module.cf_policies.security_headers_policy_id
 
+  web_acl_arn = aws_wafv2_web_acl.staging.arn
+
   price_class = "PriceClass_100"
   default_ttl = 86400
   max_ttl     = 604800

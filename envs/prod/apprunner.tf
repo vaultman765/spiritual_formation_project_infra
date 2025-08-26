@@ -36,7 +36,8 @@ module "apprunner" {
 
   # Logging / healthcheck
   health_check_path  = "/health/"
-  log_retention_days = 5
+  log_retention_days = var.log_retention_days
+  log_kms_key_arn    = module.kms_logs.kms_key_arn
 
   # ---- Plain environment variables ----
   env_vars = {

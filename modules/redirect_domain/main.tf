@@ -108,7 +108,7 @@ resource "aws_cloudfront_function" "redirect" {
 resource "aws_cloudfront_distribution" "this" {
   provider = aws.us_east_1
   # checkov:skip=CKV_AWS_305 reason="Redirect-only distribution; default root object not applicable"
-  # TODO (We’ll consider WAF/geo/origin-failover later or skip them intentionally.)
+  # checkov:skip=CKV2_AWS_47 reason="Log4j protection implemented via AWSManagedRulesKnownBadInputsRuleSet with Log4JRCE rule_action_override and AWSManagedRulesAnonymousIpList"
 
   enabled             = true
   is_ipv6_enabled     = true
@@ -116,6 +116,7 @@ resource "aws_cloudfront_distribution" "this" {
   aliases             = var.from_domains
   price_class         = var.price_class
   wait_for_deployment = true
+  web_acl_id          = var.web_acl_arn
   tags                = local.tags
 
   origin {
@@ -163,7 +164,10 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   restrictions {
-    geo_restriction { restriction_type = "none" }
+    geo_restriction {
+      restriction_type = var.geo_restriction_type
+      locations        = var.geo_locations
+    }
   }
 
   viewer_certificate {

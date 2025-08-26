@@ -70,6 +70,17 @@ resource "aws_s3_bucket_ownership_controls" "site" {
   rule { object_ownership = "BucketOwnerEnforced" }
 }
 
+resource "aws_s3_bucket_server_side_encryption_configuration" "site" {
+  bucket = aws_s3_bucket.site.id
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm     = "aws:kms"
+      kms_master_key_id = var.kms_key_arn
+    }
+    bucket_key_enabled = true
+  }
+}
+
 # ---------------- CloudFront OAI ----------------
 resource "aws_cloudfront_origin_access_identity" "oai" {
   comment = "OAI for ${var.domain_name}"
@@ -97,6 +108,7 @@ resource "aws_s3_bucket_policy" "site" {
 
 # ---------------- CloudFront ----------------
 resource "aws_cloudfront_distribution" "this" {
+  # checkov:skip=CKV2_AWS_47 reason="Log4j protection implemented via AWSManagedRulesKnownBadInputsRuleSet with Log4JRCE rule_action_override and AWSManagedRulesAnonymousIpList"
   provider = aws.us_east_1
 
   enabled         = true
@@ -150,7 +162,10 @@ resource "aws_cloudfront_distribution" "this" {
   price_class = var.price_class
 
   restrictions {
-    geo_restriction { restriction_type = "none" }
+    geo_restriction {
+      restriction_type = var.geo_restriction_type
+      locations        = var.geo_locations
+    }
   }
 
   viewer_certificate {

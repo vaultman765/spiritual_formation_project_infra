@@ -22,6 +22,8 @@ module "frontend_staging" {
 
   response_headers_policy_id = module.cf_policies.security_headers_policy_id
 
+  web_acl_arn = aws_wafv2_web_acl.staging.arn
+
   # Optional overrides
   # bucket_name  = "staging-catholicmentalprayer-com-frontend" # uncomment if you want a fixed name
   price_class = "PriceClass_100"

@@ -13,6 +13,8 @@ module "apprunner" {
   image_repository_url = module.ecr_backend.repo_url
   image_tag            = var.apprunner_image_tag
 
+  log_kms_key_arn = module.kms_logs.kms_key_arn
+
   app_port = 8000
   cpu      = var.apprunner_cpu
   memory   = var.apprunner_memory

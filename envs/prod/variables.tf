@@ -77,10 +77,6 @@ variable "ecs_import_job_memory" {
   type        = number
   description = "Memory allocation for the ECS for the import job"
 }
-variable "ecs_import_job_log_retention" {
-  type        = number
-  description = "Log retention policy for the ECS for the import job"
-}
 
 # WAF
 variable "enable_common_rule_set" {
@@ -98,10 +94,16 @@ variable "enable_ip_reputation" {
 
 # SEO Verification
 variable "google_verification" {
-  type = list(string)
+  type        = list(string)
   description = "Google DNS verification for catholicmentalprayer.com"
 }
 variable "yandex_verification" {
-  type = list(string)
+  type        = list(string)
   description = "Yandex DNS verification for catholicmentalprayer.com"
+}
+
+# Logs
+variable "log_retention_days" {
+  type        = number
+  description = "Number of days to hang onto logs"
 }

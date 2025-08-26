@@ -7,7 +7,8 @@ locals {
 resource "aws_cloudwatch_log_group" "cvpn" {
   count             = var.enable_connection_logs ? 1 : 0
   name              = "/aws/vpn/${local.name}"
-  retention_in_days = 14
+  retention_in_days = 400
+  kms_key_id        = module.kms_logs.kms_key_arn
   tags              = local.tags
 }
 

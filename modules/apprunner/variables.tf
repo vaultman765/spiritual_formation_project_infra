@@ -46,10 +46,6 @@ variable "memory" {
   type    = number
   default = 2048
 } # 2 GB
-variable "log_retention_days" {
-  type    = number
-  default = 3
-}
 variable "health_check_path" {
   type    = string
   default = "/health/"
@@ -100,4 +96,11 @@ variable "env_secrets" {
   type        = map(string)
   description = "Runtime environment secrets"
   default     = {}
+}
+variable "log_kms_key_arn" {
+  type = string
+}
+variable "log_retention_days" {
+  type    = number
+  default = 400
 }

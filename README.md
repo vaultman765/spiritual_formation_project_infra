@@ -35,7 +35,7 @@ terraform-docs markdown --config=../../.terraform-docs.yml .
 #### Run the reports for json and sarif
 
 ```bash
-checkov -d . --framework terraform --download-external-modules true --quiet --compact --output json --output-file-path "./checkov-results/" --output sarif --output-file-path "./checkov-results/"
+docker run --rm -v ${PWD}:/work -w /work bridgecrew/checkov -d ./envs/prod -d ./modules --framework terraform --download-external-modules true --quiet --compact --output json --output-file-path "./checkov-results/" --output sarif --output-file-path "./checkov-results/"
 ```
 
 #### Run the summarize script for a summary json of the report

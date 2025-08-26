@@ -98,6 +98,16 @@ resource "aws_db_parameter_group" "pg" {
     apply_method = "immediate"
   }
 
+  parameter {
+    name  = "log_connections"
+    value = "1"
+  }
+
+  parameter {
+    name  = "log_disconnections"
+    value = "1"
+  }
+
   # Ensure the new PG is created before the old one is deleted
   lifecycle {
     create_before_destroy = true
@@ -112,6 +122,7 @@ resource "random_password" "db" {
 }
 
 resource "aws_secretsmanager_secret" "db" {
+  # checkov:skip=CKV2_AWS_57: Automatic rotation controlled by Lambda every 30 days 
   name = local.secret_name
   tags = local.tags
 }
@@ -145,9 +156,10 @@ resource "aws_db_instance" "this" {
   max_allocated_storage = var.max_allocated_storage_gb
   storage_encrypted     = true
 
-  publicly_accessible = false
-  multi_az            = var.multi_az
-  apply_immediately   = true
+  publicly_accessible        = false
+  multi_az                   = var.multi_az
+  apply_immediately          = true
+  auto_minor_version_upgrade = true
 
   # Guarantees groups exist before we modify the instance to use them
   depends_on = [
@@ -175,11 +187,8 @@ resource "aws_db_instance" "this" {
   monitoring_interval = var.monitoring_interval
   monitoring_role_arn = var.monitoring_interval > 0 ? var.monitoring_role_arn : null
 
-
-
   tags = local.tags
 }
-
 # Secret value AFTER instance exists (includes host/port)
 resource "aws_secretsmanager_secret_version" "db_current" {
   count     = var.enabled ? 1 : 0
@@ -213,5 +222,6 @@ data "aws_db_snapshot" "latest" {
 resource "aws_cloudwatch_log_group" "rds_postgresql" {
   count             = var.enabled && var.identifier != "" ? 1 : 0
   name              = "/aws/rds/instance/${var.identifier}/postgresql"
-  retention_in_days = var.rds_log_retention_days
+  retention_in_days = var.log_retention_days
+  kms_key_id        = var.kms_key_arn
 }

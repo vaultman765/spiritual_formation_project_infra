@@ -24,6 +24,7 @@ resource "aws_cloudfront_origin_access_control" "oac" {
 
 # ---------------- CloudFront distribution ----------------
 resource "aws_cloudfront_distribution" "static" {
+  # checkov:skip=CKV2_AWS_47 reason="Log4j protection implemented via AWSManagedRulesKnownBadInputsRuleSet with Log4JRCE rule_action_override and AWSManagedRulesAnonymousIpList"
   provider = aws.us_east_1
 
   enabled         = true

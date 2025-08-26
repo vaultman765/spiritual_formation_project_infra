@@ -22,6 +22,7 @@ resource "aws_security_group" "vpce" {
   dynamic "ingress" {
     for_each = var.allow_from_vpc_cidr ? [1] : []
     content {
+      description = "Ingress from the whole VPC CIDR"
       from_port   = 443
       to_port     = 443
       protocol    = "tcp"
@@ -31,6 +32,7 @@ resource "aws_security_group" "vpce" {
 
   # Egress allow all (matches your current file)
   egress {
+    description = "Egress allow all"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"

@@ -13,4 +13,6 @@ module "s3" {
   create_frontend_bucket   = false
   frontend_bucket_name     = "" # unused
   frontend_distribution_id = "" # unused
+
+  kms_key_arn = module.kms_logs.kms_key_arn
 }

@@ -58,6 +58,8 @@ module "logging" {
   tags        = { Project = var.project, Env = var.env, Managed = "Terraform" }
 
   bucket_name = "${var.name_prefix}-${var.region}-${data.aws_caller_identity.current.account_id}-logs"
+
+  kms_key_arn = module.kms_logs.kms_key_arn
 }
 
 data "aws_iam_policy_document" "assume_role" {

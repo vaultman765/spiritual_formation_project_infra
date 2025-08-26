@@ -19,5 +19,6 @@ module "ecs_import" {
 
   cpu                = var.ecs_import_job_cpu
   memory             = var.ecs_import_job_memory
-  log_retention_days = var.ecs_import_job_log_retention
+  log_kms_key_arn    = module.kms_logs.kms_key_arn
+  log_retention_days = var.log_retention_days
 }

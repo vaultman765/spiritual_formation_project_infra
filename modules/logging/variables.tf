@@ -8,3 +8,8 @@ variable "bucket_name" {
   default     = ""
   description = "Optional explicit bucket name. If empty, a unique name will be derived."
 }
+variable "kms_key_arn" {
+  description = "ARN of the KMS key to use for encrypting the logs bucket"
+  type        = string
+  default     = null
+}

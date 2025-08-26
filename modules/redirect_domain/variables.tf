@@ -33,3 +33,19 @@ variable "log_bucket_name" {
   type    = string
   default = null
 }
+variable "geo_restriction_type" {
+  type        = string
+  default     = "none"
+  description = "Method to use for restricting distribution (none, whitelist, blacklist)"
+}
+
+variable "geo_locations" {
+  type        = list(string)
+  default     = []
+  description = "List of country codes to block or allow (depends on geo_restriction_type)"
+}
+variable "web_acl_arn" {
+  type        = string
+  default     = null
+  description = "Optional WAFv2 Web ACL ARN to attach to this distribution"
+}

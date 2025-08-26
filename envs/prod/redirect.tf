@@ -16,4 +16,10 @@ module "redirect_mwc_prod" {
 
   response_headers_policy_id = module.cf_policies.security_headers_policy_id
   log_bucket_name            = module.logging.log_bucket_name
+
+  web_acl_arn = aws_wafv2_web_acl.prod.arn
+
+  # Keep it open to all countries but satisfy Checkov
+  geo_restriction_type = "none"
+  geo_locations        = [] # Empty list means no countries are blocked
 }

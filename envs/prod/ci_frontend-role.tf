@@ -16,6 +16,8 @@ module "ci_frontend_role_prod" {
   bucket_name                = module.frontend_site_prod.bucket_name
   cloudfront_distribution_id = module.frontend_site_prod.distribution_id
 
+  kms_key_arn = module.kms_logs.kms_key_arn
+
   # Optional: extra policy statements if you ever need them
   # policy_extra_json = []
 }
