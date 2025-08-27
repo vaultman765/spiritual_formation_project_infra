@@ -244,15 +244,15 @@ resource "aws_iam_role_policy" "firehose_waf" {
   policy = jsonencode({
     Version = "2012-10-17",
     Statement = [
-      { 
-        Effect = "Allow", 
+      {
+        Effect = "Allow",
         Action = [
-          "s3:PutObject", 
-          "s3:AbortMultipartUpload", 
-          "s3:ListBucket", 
+          "s3:PutObject",
+          "s3:AbortMultipartUpload",
+          "s3:ListBucket",
           "s3:PutBucketNotification"
-        ], 
-        Resource = [aws_s3_bucket.waf_logs.arn, "${aws_s3_bucket.waf_logs.arn}/*"] 
+        ],
+        Resource = [aws_s3_bucket.waf_logs.arn, "${aws_s3_bucket.waf_logs.arn}/*"]
       },
       {
         Effect = "Allow",
@@ -269,7 +269,7 @@ resource "aws_iam_role_policy" "firehose_waf" {
 resource "aws_wafv2_web_acl_logging_configuration" "this" {
   resource_arn            = aws_wafv2_web_acl.prod.arn
   log_destination_configs = [aws_kinesis_firehose_delivery_stream.waf.arn]
-  
+
   # Ensure the delivery stream is created first
   depends_on = [aws_kinesis_firehose_delivery_stream.waf]
 }
