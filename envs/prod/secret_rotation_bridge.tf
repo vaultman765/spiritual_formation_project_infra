@@ -96,16 +96,16 @@ data "archive_file" "apprunner_redeploy_zip" {
 resource "aws_lambda_function" "apprunner_redeploy" {
   # checkov:skip=CKV_AWS_117
   # Justification: Lambda calls App Runner public API only; VPC adds cold starts and isn’t required.
-  count                          = var.enable_secret_rotation_autodeploy ? 1 : 0
-  function_name                  = local.lambda_name
-  role                           = aws_iam_role.apprunner_redeploy[0].arn
-  handler                        = "index.handler"
-  runtime                        = "python3.12"
-  filename                       = data.archive_file.apprunner_redeploy_zip.output_path
-  source_code_hash               = data.archive_file.apprunner_redeploy_zip.output_base64sha256
-  kms_key_arn                    = module.kms_logs.kms_key_arn
+  count            = var.enable_secret_rotation_autodeploy ? 1 : 0
+  function_name    = local.lambda_name
+  role             = aws_iam_role.apprunner_redeploy[0].arn
+  handler          = "index.handler"
+  runtime          = "python3.12"
+  filename         = data.archive_file.apprunner_redeploy_zip.output_path
+  source_code_hash = data.archive_file.apprunner_redeploy_zip.output_base64sha256
+  kms_key_arn      = module.kms_logs.kms_key_arn
   # reserved_concurrent_executions = 2
-  timeout                        = 30
+  timeout = 30
   environment {
     variables = {
       APP_RUNNER_ARN = module.apprunner.service_arn
