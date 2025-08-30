@@ -37,6 +37,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "cloudtrail" {
     id     = "noncurrent-versions"
     status = "Enabled"
     noncurrent_version_expiration { noncurrent_days = 30 }
+    filter {}
   }
 
   rule {
@@ -55,6 +56,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "cloudtrail" {
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
+    filter {}
   }
 }
 

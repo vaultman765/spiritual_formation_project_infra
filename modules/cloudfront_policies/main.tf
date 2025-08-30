@@ -3,7 +3,7 @@ resource "aws_cloudfront_response_headers_policy" "security" {
   security_headers_config {
     content_type_options { override = true }
     frame_options {
-      frame_option = "DENY"
+      frame_option = "SAMEORIGIN"
       override     = true
     }
     referrer_policy {
@@ -64,7 +64,7 @@ resource "aws_cloudfront_response_headers_policy" "static_cors" {
       override   = true
     }
     frame_options {
-      frame_option = "DENY"
+      frame_option = "SAMEORIGIN"
       override     = true
     }
     strict_transport_security {

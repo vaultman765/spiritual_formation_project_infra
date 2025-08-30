@@ -199,12 +199,13 @@ resource "aws_s3_bucket_lifecycle_configuration" "waf_logs" {
     id     = "noncurrent-versions"
     status = "Enabled"
     noncurrent_version_expiration { noncurrent_days = 7 }
+    filter {}
   }
 
   rule {
     id     = "expire-logs-7d"
     status = "Enabled"
-    filter {} # Required by AWS provider
+    filter {}
 
     expiration {
       days = 7
@@ -214,7 +215,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "waf_logs" {
   rule {
     id     = "abort-incomplete-multipart-uploads"
     status = "Enabled"
-    filter {} # Applies to all objects
+    filter {}
     abort_incomplete_multipart_upload {
       days_after_initiation = 7
     }
