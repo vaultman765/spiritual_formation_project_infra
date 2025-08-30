@@ -21,3 +21,6 @@ output "distribution_arn" {
   value       = aws_cloudfront_distribution.static.arn
   description = "CloudFront distribution ARN."
 }
+output "static_embed_policy_id" {
+  value = aws_cloudfront_response_headers_policy.static_embed.id
+}

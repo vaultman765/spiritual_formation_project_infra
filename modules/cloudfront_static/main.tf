@@ -60,7 +60,7 @@ resource "aws_cloudfront_distribution" "static" {
     default_ttl = var.default_ttl
     max_ttl     = var.max_ttl
 
-    response_headers_policy_id = var.response_headers_policy_id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.static_embed.id
   }
 
   price_class = var.price_class
@@ -112,3 +112,29 @@ resource "aws_route53_record" "alias" {
     evaluate_target_health = false
   }
 }
+
+# ---------------- Response Headers Policy for Static Embed ----------------
+resource "aws_cloudfront_response_headers_policy" "static_embed" {
+  name = "sf-${var.env}-static-embed-policy"
+
+  security_headers_config {
+    frame_options {
+      frame_option = "SAMEORIGIN" # instead of DENY
+      override     = true
+    }
+
+    content_security_policy {
+      content_security_policy = "frame-ancestors 'self';"
+      override                = true
+    }
+  }
+
+  custom_headers_config {
+    items {
+      header   = "Content-Disposition"
+      value    = "inline"
+      override = true
+    }
+  }
+}
+

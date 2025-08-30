@@ -14,6 +14,7 @@ module "static_admin_prod" {
   project = var.project
   env     = var.env
   region  = var.region
+  name_prefix = var.name_prefix
 
   bucket_name         = var.metadata_bucket
   origin_path         = ""

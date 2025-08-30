@@ -57,7 +57,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "logs" {
   rule {
     id     = "expire-logs-30d"
     status = "Enabled"
-    filter {} # Required by AWS provider
+    filter {}
 
     expiration {
       days = 30
