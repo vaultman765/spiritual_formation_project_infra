@@ -17,6 +17,7 @@
 variable "project" { type = string }
 variable "env" { type = string }
 variable "region" { type = string }
+variable "name_prefix" { type = string }
 
 variable "domain_name" {
   description = "Full hostname users will hit (e.g. staging.catholicmentalprayer.com)."
