@@ -13,6 +13,7 @@ module "frontend_site_prod" {
   project = var.project
   env     = var.env
   region  = var.region
+  name_prefix = var.name_prefix
 
   # Domain & cert
   domain_name         = var.frontend_domain_name

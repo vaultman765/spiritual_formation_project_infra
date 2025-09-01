@@ -136,6 +136,11 @@ resource "aws_cloudfront_distribution" "this" {
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
     cached_methods  = ["GET", "HEAD"]
 
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.append_index_html.arn
+    }
+
     forwarded_values {
       query_string = true
       cookies { forward = "none" }
@@ -146,7 +151,7 @@ resource "aws_cloudfront_distribution" "this" {
     max_ttl     = var.max_ttl
 
     response_headers_policy_id = var.response_headers_policy_id
-  }
+}
 
   dynamic "custom_error_response" {
     for_each = var.spa_mode ? [403, 404] : []
@@ -202,4 +207,25 @@ resource "aws_route53_record" "alias" {
     zone_id                = "Z2FDTNDATAQYW2"
     evaluate_target_health = false
   }
+}
+
+resource "aws_cloudfront_function" "append_index_html" {
+  name    = "${var.name_prefix}-site-append-index-html"
+  runtime = "cloudfront-js-1.0"
+  comment = "Rewrite pretty URLs to index.html for site"
+  publish = true
+
+  code = <<EOT
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  if (uri.endsWith('/')) {
+    request.uri += 'index.html';
+  } else if (!uri.includes('.')) {
+    request.uri += '/index.html';
+  }
+  return request;
+}
+EOT
 }

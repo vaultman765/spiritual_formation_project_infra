@@ -51,6 +51,11 @@ resource "aws_cloudfront_distribution" "static" {
     allowed_methods = ["GET", "HEAD", "OPTIONS"]
     cached_methods  = ["GET", "HEAD"]
 
+    function_association {
+      event_type   = "viewer-request"
+      function_arn = aws_cloudfront_function.append_index_html.arn
+    }
+
     forwarded_values {
       query_string = true
       cookies { forward = "none" }
@@ -62,7 +67,6 @@ resource "aws_cloudfront_distribution" "static" {
 
     response_headers_policy_id = aws_cloudfront_response_headers_policy.static_embed.id
   }
-
   price_class = var.price_class
 
   restrictions {
@@ -138,3 +142,24 @@ resource "aws_cloudfront_response_headers_policy" "static_embed" {
   }
 }
 
+# ---------------- CloudFront Function: Append index.html ----------------
+resource "aws_cloudfront_function" "append_index_html" {
+  name    = "${var.name_prefix}-append-index-html"
+  runtime = "cloudfront-js-1.0"
+  comment = "Rewrite pretty URLs to index.html"
+  publish = true
+
+  code = <<EOT
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  if (uri.endsWith('/')) {
+    request.uri += 'index.html';
+  } else if (!uri.includes('.')) {
+    request.uri += '/index.html';
+  }
+  return request;
+}
+EOT
+}
