@@ -11,9 +11,9 @@ module "static_admin_prod" {
     aws.us_east_1 = aws.us_east_1
   }
 
-  project = var.project
-  env     = var.env
-  region  = var.region
+  project     = var.project
+  env         = var.env
+  region      = var.region
   name_prefix = var.name_prefix
 
   bucket_name         = var.metadata_bucket

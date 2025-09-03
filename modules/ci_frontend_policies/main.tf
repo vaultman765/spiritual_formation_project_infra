@@ -74,9 +74,9 @@ data "aws_iam_policy_document" "combined" {
   dynamic "statement" {
     for_each = var.kms_key_arn != null ? [1] : []
     content {
-      sid       = "KMSS3Encryption"
-      effect    = "Allow"
-      actions   = [
+      sid    = "KMSS3Encryption"
+      effect = "Allow"
+      actions = [
         "kms:GenerateDataKey",
         "kms:Decrypt",
         "kms:DescribeKey"

@@ -89,3 +89,15 @@ module "cf_policies" {
   source      = "../../modules/cloudfront_policies"
   name_prefix = var.name_prefix
 }
+
+module "bot_prerender" {
+  source = "../../modules/lambda_edge_bot"
+
+  providers = {
+    aws.us_east_1 = aws.us_east_1
+  }
+
+  name_prefix = var.name_prefix
+  site_origin = "https://www.catholicmentalprayer.com"
+  api_base    = "https://api.catholicmentalprayer.com"
+}

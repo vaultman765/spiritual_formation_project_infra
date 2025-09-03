@@ -94,3 +94,8 @@ variable "kms_key_arn" {
   type        = string
   default     = null
 }
+
+variable "bot_prerender_arn" {
+  type        = string
+  description = "Published version ARN of the Lambda@Edge prerender function"
+}

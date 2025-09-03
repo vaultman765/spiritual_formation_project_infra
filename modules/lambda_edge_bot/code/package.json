@@ -1,0 +1,7 @@
+{
+  "name": "bot-prerender",
+  "version": "1.0.0",
+  "description": "Lambda@Edge prerender for social bots",
+  "main": "index.js",
+  "license": "MIT"
+}

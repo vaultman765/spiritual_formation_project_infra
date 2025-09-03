@@ -37,8 +37,8 @@ module "redirect_apex_to_www" {
   name_prefix    = "${var.name_prefix}-apex-redirect"
   hosted_zone_id = data.aws_route53_zone.root.zone_id
 
-  from_domains = ["catholicmentalprayer.com"]  # apex domain
-  to_domain    = var.frontend_domain_name      # www subdomain
+  from_domains = ["catholicmentalprayer.com"] # apex domain
+  to_domain    = var.frontend_domain_name     # www subdomain
 
   response_headers_policy_id = module.cf_policies.security_headers_policy_id
   log_bucket_name            = module.logging.log_bucket_name
