@@ -129,6 +129,46 @@ resource "aws_cloudfront_distribution" "this" {
 
   default_root_object = "index.html"
 
+  ordered_cache_behavior {
+    path_pattern           = "/days/*"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD"]
+
+    lambda_function_association {
+      event_type   = "viewer-request"
+      lambda_arn   = var.bot_prerender_arn
+    }
+
+
+    forwarded_values {
+      query_string = true
+      cookies { forward = "none" }
+    }
+  }
+
+  ordered_cache_behavior {
+    path_pattern           = "/arcs/*"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+
+    allowed_methods = ["GET", "HEAD", "OPTIONS"]
+    cached_methods  = ["GET", "HEAD"]
+
+    lambda_function_association {
+      event_type   = "viewer-request"
+      lambda_arn   = var.bot_prerender_arn
+    }
+
+
+    forwarded_values {
+      query_string = true
+      cookies { forward = "none" }
+    }
+  }
+
   default_cache_behavior {
     target_origin_id       = "s3-origin-${var.domain_name}"
     viewer_protocol_policy = "redirect-to-https"
@@ -151,7 +191,7 @@ resource "aws_cloudfront_distribution" "this" {
     max_ttl     = var.max_ttl
 
     response_headers_policy_id = var.response_headers_policy_id
-}
+  }
 
   dynamic "custom_error_response" {
     for_each = var.spa_mode ? [403, 404] : []

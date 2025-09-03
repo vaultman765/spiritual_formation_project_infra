@@ -10,9 +10,9 @@ module "frontend_site_prod" {
     aws.us_east_1 = aws.us_east_1
   }
 
-  project = var.project
-  env     = var.env
-  region  = var.region
+  project     = var.project
+  env         = var.env
+  region      = var.region
   name_prefix = var.name_prefix
 
   # Domain & cert
@@ -41,4 +41,5 @@ module "frontend_site_prod" {
   geo_locations        = [] # Empty list means no countries are blocked
 
   kms_key_arn = module.kms_logs.kms_key_arn
+  bot_prerender_arn = module.bot_prerender.version_arn
 }
