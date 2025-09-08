@@ -107,21 +107,18 @@ resource "aws_s3_bucket_policy" "site" {
 
 # ---------------- CloudFront ----------------
 resource "aws_cloudfront_distribution" "this" {
-  # checkov:skip=CKV2_AWS_47 reason="Log4j protection implemented via AWSManagedRulesKnownBadInputsRuleSet with Log4JRCE rule_action_override and AWSManagedRulesAnonymousIpList"
   provider = aws.us_east_1
 
   enabled         = true
   is_ipv6_enabled = true
   comment         = var.domain_name
 
-  aliases = [var.domain_name]
-
+  aliases   = [var.domain_name]
   web_acl_id = var.web_acl_arn
 
   origin {
     domain_name = aws_s3_bucket.site.bucket_regional_domain_name
     origin_id   = "s3-origin-${var.domain_name}"
-
     s3_origin_config {
       origin_access_identity = aws_cloudfront_origin_access_identity.oai.cloudfront_access_identity_path
     }
@@ -129,19 +126,18 @@ resource "aws_cloudfront_distribution" "this" {
 
   default_root_object = "index.html"
 
+  # Bot prerender: /days/*
   ordered_cache_behavior {
     path_pattern           = "/days/*"
     target_origin_id       = "s3-origin-${var.domain_name}"
     viewer_protocol_policy = "redirect-to-https"
-
-    allowed_methods = ["GET", "HEAD", "OPTIONS"]
-    cached_methods  = ["GET", "HEAD"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
 
     lambda_function_association {
-      event_type   = "viewer-request"
-      lambda_arn   = var.bot_prerender_arn
+      event_type = "viewer-request"
+      lambda_arn = var.bot_prerender_arn
     }
-
 
     forwarded_values {
       query_string = true
@@ -149,19 +145,18 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
+  # Bot prerender: /arcs/*
   ordered_cache_behavior {
     path_pattern           = "/arcs/*"
     target_origin_id       = "s3-origin-${var.domain_name}"
     viewer_protocol_policy = "redirect-to-https"
-
-    allowed_methods = ["GET", "HEAD", "OPTIONS"]
-    cached_methods  = ["GET", "HEAD"]
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
 
     lambda_function_association {
-      event_type   = "viewer-request"
-      lambda_arn   = var.bot_prerender_arn
+      event_type = "viewer-request"
+      lambda_arn = var.bot_prerender_arn
     }
-
 
     forwarded_values {
       query_string = true
@@ -169,12 +164,142 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
+  # JS
+  ordered_cache_behavior {
+    path_pattern           = "*.js"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = true
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # CSS
+  ordered_cache_behavior {
+    path_pattern           = "*.css"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = true
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Images - JPG
+  ordered_cache_behavior {
+    path_pattern           = "*.jpg"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = false
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Images - JPEG
+  ordered_cache_behavior {
+    path_pattern           = "*.jpeg"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = false
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Images - PNG
+  ordered_cache_behavior {
+    path_pattern           = "*.png"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = false
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Images - WebP
+  ordered_cache_behavior {
+    path_pattern           = "*.webp"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = false
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Images - AVIF
+  ordered_cache_behavior {
+    path_pattern           = "*.avif"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = false
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Fonts
+  ordered_cache_behavior {
+    path_pattern           = "*.woff2"
+    target_origin_id       = "s3-origin-${var.domain_name}"
+    viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD"]
+    cached_methods         = ["GET", "HEAD"]
+
+    compress = false
+    forwarded_values {
+      query_string = false
+      cookies { forward = "none" }
+    }
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_static.id
+  }
+
+  # Default: HTML
   default_cache_behavior {
     target_origin_id       = "s3-origin-${var.domain_name}"
     viewer_protocol_policy = "redirect-to-https"
+    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
+    cached_methods         = ["GET", "HEAD"]
 
-    allowed_methods = ["GET", "HEAD", "OPTIONS"]
-    cached_methods  = ["GET", "HEAD"]
+    compress = true
 
     function_association {
       event_type   = "viewer-request"
@@ -190,7 +315,7 @@ resource "aws_cloudfront_distribution" "this" {
     default_ttl = var.default_ttl
     max_ttl     = var.max_ttl
 
-    response_headers_policy_id = var.response_headers_policy_id
+    response_headers_policy_id = aws_cloudfront_response_headers_policy.cache_html.id
   }
 
   dynamic "custom_error_response" {
@@ -213,21 +338,9 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   viewer_certificate {
-    acm_certificate_arn      = var.acm_certificate_arn # must be in us-east-1
+    acm_certificate_arn      = var.acm_certificate_arn
     ssl_support_method       = "sni-only"
     minimum_protocol_version = "TLSv1.2_2021"
-  }
-
-  logging_config {
-    bucket          = var.log_bucket_name == null ? null : "${var.log_bucket_name}.s3.amazonaws.com"
-    include_cookies = false
-    prefix          = "cloudfront/${var.domain_name}/"
-  }
-
-  tags = {
-    Project     = var.project
-    Environment = var.env
-    ManagedBy   = "Terraform"
   }
 }
 
@@ -249,6 +362,7 @@ resource "aws_route53_record" "alias" {
   }
 }
 
+# ---------------- CloudFront Function ----------------
 resource "aws_cloudfront_function" "append_index_html" {
   name    = "${var.name_prefix}-site-append-index-html"
   runtime = "cloudfront-js-1.0"
@@ -268,4 +382,32 @@ function handler(event) {
   return request;
 }
 EOT
+}
+
+
+# ---------------- Response Headers Policies ----------------
+# Cache policy for static assets
+resource "aws_cloudfront_response_headers_policy" "cache_static" {
+  name = "sf-${var.env}-cache-static"
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      value    = "public, max-age=31536000, immutable"
+      override = true
+    }
+  }
+}
+
+# Cache policy for HTML
+resource "aws_cloudfront_response_headers_policy" "cache_html" {
+  name = "sf-${var.env}-cache-html"
+
+  custom_headers_config {
+    items {
+      header   = "Cache-Control"
+      value    = "no-cache"
+      override = true
+    }
+  }
 }
